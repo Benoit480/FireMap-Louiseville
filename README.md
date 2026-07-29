@@ -1,15 +1,30 @@
-# FireMap Louiseville — Version 2
+# Extension d’adresses — FireMap Louiseville
 
-Application Web progressive sombre optimisée pour iPhone et GitHub Pages.
+Cette extension ajoute une recherche d’adresses à FireMap sans copier Google Maps.
 
-## Installation
-1. Téléversez tous les fichiers de ce dossier à la racine du dépôt GitHub.
-2. Settings > Pages > Deploy from a branch > main > /(root).
-3. Ouvrez l’adresse GitHub Pages dans Safari.
-4. Partager > Sur l’écran d’accueil > Ajouter.
+## Source utilisée
 
-## Fonctions
-Carte, GPS, ajout/modification/suppression, photos, débit, pression, diamètre, inspections, recherche, filtres, borne la plus proche, navigation et import/export GeoJSON.
+La recherche utilise **OpenStreetMap / Nominatim**. Elle est gratuite pour un usage interactif raisonnable. L’extension :
 
-## Important
-Les données sont sauvegardées localement dans Safari. Exportez régulièrement. Les données opérationnelles doivent être validées par le service incendie.
+- limite les recherches à Louiseville;
+- attend avant d’envoyer une requête;
+- ne fait pas plus d’une requête par seconde;
+- conserve les résultats déjà cherchés dans un cache local;
+- affiche l’attribution OpenStreetMap;
+- ne télécharge pas les adresses en masse.
+
+Cette extension ne garantit pas que toutes les adresses civiles de Louiseville sont présentes. Pour un usage opérationnel, les adresses doivent être validées avec une source municipale ou gouvernementale officielle.
+
+## Fichiers
+
+- `address-search.js` : moteur de recherche.
+- `address-search.css` : apparence sombre.
+- `integration-firemap-v2.js` : code à ajouter à FireMap V2.
+- `INSTALLATION.md` : étapes détaillées.
+- `LICENSE-NOTICE.txt` : avis sur la source et l’attribution.
+
+## Limite importante
+
+Le serveur public Nominatim convient à une petite application et aux recherches manuelles. Il ne doit pas être utilisé pour télécharger toutes les adresses, faire des recherches automatiques massives ou envoyer un grand nombre de requêtes.
+
+Pour un déploiement municipal à plusieurs utilisateurs, il faudra utiliser une instance dédiée ou importer un jeu de données officiel comme le Référentiel québécois des adresses.

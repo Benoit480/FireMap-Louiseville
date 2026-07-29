@@ -30,3 +30,10 @@ Le fichier BDOA_QC_v1 fourni ne contenait aucune ligne attribuée à Louiseville
 
 ## Sécurité
 FireMap est un outil d'aide. Toute borne, adresse, pression ou capacité doit être validée par le service incendie et la municipalité avant un usage opérationnel.
+
+
+## Modification des fiches de bornes
+
+- Type de sortie : `1 × 4 po + 2 × 2,5 po` ou `2 × 2,5 po`.
+- Couleur et débit GPM : rouge, orange, vert ou bleu.
+- Les champs pression PSI, diamètre mm et débit manuel ont été retirés.

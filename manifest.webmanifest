@@ -1,13 +1,13 @@
 {
-  "name": "FireMap Louiseville",
-  "short_name": "FireMap",
+  "name": "FireMap Louiseville V3 Pro",
+  "short_name": "FireMap Pro",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#080b10",
   "theme_color": "#080b10",
-  "description": "Cartographie des bornes-fontaines de Louiseville.",
+  "description": "Cartographie opérationnelle des bornes-fontaines, adresses et inspections de Louiseville.",
   "icons": [
     {
       "src": "./icon-192.png",

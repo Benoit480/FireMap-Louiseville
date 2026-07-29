@@ -1,30 +1,32 @@
-# Extension d’adresses — FireMap Louiseville
+# FireMap Louiseville V3 Pro
 
-Cette extension ajoute une recherche d’adresses à FireMap sans copier Google Maps.
+Version Web/PWA professionnelle pour GitHub Pages.
 
-## Source utilisée
+## Nouveautés V3 Pro
+- Débits en gallons par minute (GPM)
+- Recherche de bornes et d'adresses de Louiseville
+- Recherche d'adresses via le géocodeur officiel du gouvernement du Québec
+- Mode intervention avec borne disponible la plus proche
+- Distance approximative entre l'intervention et la borne
+- Rayon de couverture de 300 mètres
+- Propriété municipale ou privée
+- Couleur, dégagement, essai de débit et prochaine inspection
+- Photos, import/export GeoJSON et sauvegarde locale
+- Thème sombre noir et rouge
+- Installation sur iPhone comme PWA
 
-La recherche utilise **OpenStreetMap / Nominatim**. Elle est gratuite pour un usage interactif raisonnable. L’extension :
+## Installation GitHub Pages
+1. Décompresser le ZIP.
+2. Remplacer tous les fichiers de l'ancien dépôt par ceux-ci.
+3. Conserver Settings > Pages > main > /(root).
+4. Attendre 2 à 5 minutes.
+5. Ouvrir le site dans Safari et l'ajouter à l'écran d'accueil.
 
-- limite les recherches à Louiseville;
-- attend avant d’envoyer une requête;
-- ne fait pas plus d’une requête par seconde;
-- conserve les résultats déjà cherchés dans un cache local;
-- affiche l’attribution OpenStreetMap;
-- ne télécharge pas les adresses en masse.
+## Adresses
+La recherche directe utilise le service officiel de géocodage du gouvernement du Québec.
+Le fichier `adresses-louiseville.json` est aussi prévu pour une future base entièrement hors ligne.
 
-Cette extension ne garantit pas que toutes les adresses civiles de Louiseville sont présentes. Pour un usage opérationnel, les adresses doivent être validées avec une source municipale ou gouvernementale officielle.
+Le fichier BDOA_QC_v1 fourni ne contenait aucune ligne attribuée à Louiseville, ni au code postal J5V. Il n'a donc pas été possible d'intégrer légalement une liste locale complète à partir de ce fichier sans inventer des adresses.
 
-## Fichiers
-
-- `address-search.js` : moteur de recherche.
-- `address-search.css` : apparence sombre.
-- `integration-firemap-v2.js` : code à ajouter à FireMap V2.
-- `INSTALLATION.md` : étapes détaillées.
-- `LICENSE-NOTICE.txt` : avis sur la source et l’attribution.
-
-## Limite importante
-
-Le serveur public Nominatim convient à une petite application et aux recherches manuelles. Il ne doit pas être utilisé pour télécharger toutes les adresses, faire des recherches automatiques massives ou envoyer un grand nombre de requêtes.
-
-Pour un déploiement municipal à plusieurs utilisateurs, il faudra utiliser une instance dédiée ou importer un jeu de données officiel comme le Référentiel québécois des adresses.
+## Sécurité
+FireMap est un outil d'aide. Toute borne, adresse, pression ou capacité doit être validée par le service incendie et la municipalité avant un usage opérationnel.

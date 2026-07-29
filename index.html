@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#b91c1c" />
+  <title>FireMap Louiseville</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>🚒 FireMap Louiseville</h1>
+      <p>Bornes-fontaines et points d’eau</p>
+    </div>
+    <button id="locateBtn" aria-label="Me localiser">📍</button>
+  </header>
+
+  <section class="toolbar">
+    <input id="searchInput" type="search" placeholder="Rechercher une borne, une adresse…" />
+    <select id="filterSelect" aria-label="Filtrer les points">
+      <option value="all">Tous les points</option>
+      <option value="hydrant">Bornes-fontaines</option>
+      <option value="water">Points d’eau</option>
+      <option value="risk">Bâtiments à risque</option>
+      <option value="station">Caserne</option>
+    </select>
+  </section>
+
+  <div id="map"></div>
+
+  <nav class="bottom-bar">
+    <button id="addBtn">➕ Ajouter</button>
+    <button id="listBtn">📋 Liste</button>
+    <button id="exportBtn">⬆️ Exporter</button>
+    <label class="file-label">⬇️ Importer<input id="importInput" type="file" accept=".json,.geojson" hidden></label>
+  </nav>
+
+  <dialog id="pointDialog">
+    <form method="dialog" id="pointForm">
+      <h2 id="dialogTitle">Ajouter un point</h2>
+      <input type="hidden" id="pointId" />
+      <div class="grid">
+        <label>Type
+          <select id="pointType" required>
+            <option value="hydrant">Borne-fontaine</option>
+            <option value="water">Point d’eau</option>
+            <option value="risk">Bâtiment à risque</option>
+            <option value="station">Caserne</option>
+          </select>
+        </label>
+        <label>Numéro / nom
+          <input id="pointName" required placeholder="Ex. BF-001" />
+        </label>
+        <label>Adresse
+          <input id="pointAddress" placeholder="Ex. 123 rue…" />
+        </label>
+        <label>Débit (L/min)
+          <input id="pointFlow" type="number" min="0" placeholder="Ex. 4500" />
+        </label>
+        <label>Pression
+          <input id="pointPressure" placeholder="Ex. 55 psi" />
+        </label>
+        <label>État
+          <select id="pointStatus">
+            <option value="active">Active</option>
+            <option value="inspection">À inspecter</option>
+            <option value="out">Hors service</option>
+          </select>
+        </label>
+        <label>Latitude
+          <input id="pointLat" type="number" step="any" required />
+        </label>
+        <label>Longitude
+          <input id="pointLng" type="number" step="any" required />
+        </label>
+      </div>
+      <label>Notes
+        <textarea id="pointNotes" rows="3" placeholder="Accès, enneigement, sortie, etc."></textarea>
+      </label>
+      <menu>
+        <button type="button" class="secondary" id="cancelBtn">Annuler</button>
+        <button type="button" class="danger hidden" id="deleteBtn">Supprimer</button>
+        <button type="submit" class="primary">Enregistrer</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="listDialog">
+    <div class="list-header">
+      <h2>Points cartographiés</h2>
+      <button id="closeListBtn">✕</button>
+    </div>
+    <div id="pointsList"></div>
+  </dialog>
+
+  <div id="toast"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,21 +1,25 @@
 {
   "name": "FireMap Louiseville",
   "short_name": "FireMap",
+  "id": "./",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f9fafb",
-  "theme_color": "#b91c1c",
-  "description": "Cartographie locale des bornes-fontaines et points d’eau.",
+  "background_color": "#080b10",
+  "theme_color": "#080b10",
+  "description": "Cartographie des bornes-fontaines de Louiseville.",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

@@ -1,23 +1,15 @@
-# FireMap Louiseville — version Web installable
+# FireMap Louiseville — Version 2
 
-## Ce que l’application fait
-- Carte interactive centrée sur Louiseville
-- Ajout de bornes-fontaines, points d’eau, bâtiments à risque et caserne
-- Ajout par position GPS, centre de la carte ou appui prolongé
-- Modification et suppression des points
-- Recherche et filtres
-- Navigation Google Maps
-- Sauvegarde locale sur l’appareil
-- Export et import GeoJSON
-- Installation sur l’écran d’accueil de l’iPhone
+Application Web progressive sombre optimisée pour iPhone et GitHub Pages.
 
-## Installation sur iPhone
-1. Héberger le dossier sur un service HTTPS (GitHub Pages, Netlify, Cloudflare Pages ou autre).
-2. Ouvrir l’adresse dans Safari.
-3. Appuyer sur Partager.
-4. Choisir « Sur l’écran d’accueil ».
-5. Ouvrir FireMap depuis l’icône créée.
+## Installation
+1. Téléversez tous les fichiers de ce dossier à la racine du dépôt GitHub.
+2. Settings > Pages > Deploy from a branch > main > /(root).
+3. Ouvrez l’adresse GitHub Pages dans Safari.
+4. Partager > Sur l’écran d’accueil > Ajouter.
+
+## Fonctions
+Carte, GPS, ajout/modification/suppression, photos, débit, pression, diamètre, inspections, recherche, filtres, borne la plus proche, navigation et import/export GeoJSON.
 
 ## Important
-Les données sont stockées localement dans Safari. Exportez régulièrement un fichier GeoJSON pour éviter toute perte de données.
-La carte de fond utilise OpenStreetMap via Internet. Les fiches et points restent sauvegardés localement.
+Les données sont sauvegardées localement dans Safari. Exportez régulièrement. Les données opérationnelles doivent être validées par le service incendie.

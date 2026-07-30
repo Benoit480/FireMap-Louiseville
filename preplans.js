@@ -78,5 +78,8 @@
   },{passive:true}));
   mapContainer.addEventListener("contextmenu",e=>{if(editMode){e.preventDefault();e.stopPropagation()}},{passive:false});
 
+  window.fireMapPreplans={getBuildings:()=>buildings.slice(),openPreplanById:id=>openPreplan(buildings.find(b=>b.id===id)),showBuildingOnMap:id=>{const b=buildings.find(x=>x.id===id);if(b)showOnMap(b)}};
+  window.dispatchEvent(new Event("firemap-preplans-ready"));
+
   const connect=()=>{const c=window.fireMapCloud;if(!c?.configured||!c.subscribeBuildings){setBuildings([]);return}c.subscribeBuildings(setBuildings,e=>{console.error(e);I.toast("Erreur de synchronisation des bâtiments.")})};if(window.fireMapCloud)connect();else window.addEventListener("firemap-cloud-ready",connect,{once:true});
 })();

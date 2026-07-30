@@ -23,6 +23,7 @@
   <aside id="drawer" class="drawer" aria-hidden="true">
     <div class="drawer-head"><div><div class="eyebrow">SERVICE INCENDIE</div><h2>Louiseville</h2></div><button id="closeDrawer">×</button></div>
     <button data-view="map" class="drawer-link active">🗺️ Carte opérationnelle</button>
+    <button data-view="assistant" class="drawer-link">🚨 Assistant d’intervention</button>
     <button data-view="hydrants" class="drawer-link">🚰 Bornes-fontaines</button>
     <button id="drawerAdd" class="drawer-link">➕ Ajouter</button>
     <button data-view="preplans" class="drawer-link">🏢 Préplans / bâtiments</button>
@@ -67,6 +68,24 @@
       </div>
     </section>
 
+
+    <section id="view-assistant" class="view">
+      <div class="section-title"><div><small>MODE OPÉRATIONNEL</small><h2>🚨 Assistant d’intervention</h2></div><button id="assistantBackMap" class="secondary small">🗺️ Carte</button></div>
+      <div class="assistant-address-card">
+        <label>Adresse de l’intervention</label>
+        <div class="assistant-address-row"><input id="assistantAddress" type="search" placeholder="Ex. 245 St-Laurent"><button id="assistantUseActive" class="secondary">Utiliser l’adresse active</button><button id="assistantLaunch" class="primary">Démarrer</button></div>
+        <div id="assistantSuggestions" class="results"></div>
+      </div>
+      <div id="assistantEmpty" class="assistant-empty"><span>🚒</span><h3>Prêt pour un départ d’appel</h3><p>Saisissez une adresse ou utilisez l’adresse déjà sélectionnée sur la carte.</p></div>
+      <div id="assistantDashboard" class="hidden">
+        <div class="assistant-alert-head"><div><small>INTERVENTION ACTIVE</small><h2 id="assistantActiveAddress"></h2><span id="assistantPreplanStatus"></span></div><button id="assistantNavigate" class="primary">➤ Naviguer</button></div>
+        <div id="assistantCritical" class="assistant-critical-grid"></div>
+        <section class="assistant-panel"><div class="assistant-panel-head"><h3>🚰 Bornes recommandées</h3><button id="assistantShowMap" class="secondary small">Voir sur la carte</button></div><div id="assistantHydrants" class="assistant-hydrant-list"></div></section>
+        <section id="assistantPreplanPanel" class="assistant-panel hidden"><div class="assistant-panel-head"><h3>🏢 Préplan du bâtiment</h3><button id="assistantOpenPreplan" class="primary small">Ouvrir le préplan complet</button></div><div id="assistantPreplanSummary"></div></section>
+        <div class="assistant-actions"><button id="assistantEnd" class="danger">Terminer l’intervention</button></div>
+      </div>
+    </section>
+
     <section id="view-hydrants" class="view">
       <div class="section-title"><div><small>RÉSEAU INCENDIE</small><h2>Bornes-fontaines</h2></div><button id="addHydrantTop" class="primary small">＋ Ajouter</button></div>
       <div class="filter-row"><input id="hydrantSearch" type="search" placeholder="Rechercher numéro, rue, statut…"><select id="statusFilter"><option value="">Tous les statuts</option><option value="available">Disponible</option><option value="restricted">Restreinte</option><option value="out_of_service">Hors service</option><option value="unknown">Inconnue</option></select></div>
@@ -93,6 +112,7 @@
 
   <nav class="bottom-nav">
     <button data-view="map" class="active">🗺️<span>Carte</span></button>
+    <button data-view="assistant">🚨<span>Intervention</span></button>
     <button data-view="hydrants">🚰<span>Bornes</span></button>
     <button id="bottomAdd" class="add-main">＋<span>Ajouter</span></button>
     <button data-view="preplans">🏢<span>Préplans</span></button>
@@ -166,5 +186,6 @@
   <script src="firebase-sync.js"></script>
   <script src="app.js"></script>
   <script src="preplans.js"></script>
+  <script src="assistant.js"></script>
 </body>
 </html>

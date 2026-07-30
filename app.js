@@ -20,14 +20,14 @@ async function img(file){return new Promise(r=>{let fr=new FileReader();fr.onloa
 map.on("click",e=>pending=e.latlng);map.on("contextmenu",e=>add(e.latlng));
 $("menuBtn").onclick=()=>$("panel").classList.add("open");$("closePanel").onclick=()=>$("panel").classList.remove("open");$("filterBtn").onclick=()=>$("filters").classList.add("open");$("closeFilters").onclick=()=>$("filters").classList.remove("open");$("closeDetails").onclick=()=>$("details").classList.add("hidden");$("addBtn").onclick=()=>add(pending||{lat:user?.[0]||map.getCenter().lat,lng:user?.[1]||map.getCenter().lng});$("cancelBtn").onclick=()=>$("pointDialog").close();$("editBtn").onclick=()=>sel&&edit(sel.id);$("navBtn").onclick=()=>sel&&open(`https://www.google.com/maps/dir/?api=1&destination=${sel.lat},${sel.lng}`,"_blank");
 $("locateBtn").onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{user=[p.coords.latitude,p.coords.longitude];map.setView(user,17);L.circleMarker(user,{radius:8,color:"white",fillColor:"#1689ff",fillOpacity:1,weight:3}).addTo(map)},()=>toast("Position impossible"),{enableHighAccuracy:true}):toast("GPS non disponible");
-$("pointForm").onsubmit=async e=>{e.preventDefault();let id=$("pointId").value||uid(),old=pts.find(p=>p.id===id),photo=old?.photo||"",f=$("photo").files[0];if(f)photo=await img(f);let p={id,type:$("type").value,name:$("name").value.trim(),address:$("address").value.trim(),flow:$("flow").value,outlet:$("outlet").value,status:$("status").value,inspection:$("inspection").value,notes:$("notes").value.trim(),lat:+$("lat").value,lng:+$("lng").value,photo};let i=pts.findIndex(x=>x.id===id);i>=0?pts[i]=p:pts.push(p);save();render();$("pointDialog").close();details(id);toast("Point enregistré")};
-$("deleteBtn").onclick=()=>{let id=$("pointId").value;if(confirm("Supprimer ce point?")){pts=pts.filter(p=>p.id!==id);save();render();$("pointDialog").close();$("details").classList.add("hidden")}};
+$("pointForm").onsubmit=async e=>{e.preventDefault();let id=$("pointId").value||uid(),old=pts.find(p=>p.id===id),photo=old?.photo||"",f=$("photo").files[0];if(f)photo=await img(f);let p={id,type:$("type").value,name:$("name").value.trim(),address:$("address").value.trim(),flow:$("flow").value,outlet:$("outlet").value,status:$("status").value,inspection:$("inspection").value,notes:$("notes").value.trim(),lat:+$("lat").value,lng:+$("lng").value,photo};let i=pts.findIndex(x=>x.id===id);i>=0?pts[i]=p:pts.push(p);save();render();$("pointDialog").close();details(id);toast("Point enregistré");if(window.fireMapCloud?.configured)window.fireMapCloud.savePoint(p).catch(()=>toast("Sauvegarde en ligne impossible"))};
+$("deleteBtn").onclick=()=>{let id=$("pointId").value;if(confirm("Supprimer ce point?")){pts=pts.filter(p=>p.id!==id);save();render();$("pointDialog").close();$("details").classList.add("hidden");if(window.fireMapCloud?.configured)window.fireMapCloud.deletePoint(id).catch(()=>toast("Suppression en ligne impossible"))}};
 document.querySelectorAll(".chips button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".chips button").forEach(x=>x.classList.remove("active"));b.classList.add("active");filter=b.dataset.f;render()});$("activeOnly").onchange=e=>{activeOnly=e.target.checked;render()};
 function list(mode="all"){$("listTitle").textContent=mode==="inspection"?"Inspections requises":"Points cartographiés";let a=mode==="inspection"?pts.filter(p=>p.status==="inspection"):pts;$("pointsList").innerHTML=a.length?a.map(p=>`<div class="row"><div class="row-marker">${p.type==="hydrant"?hydrantHTML(p):`<img src="${p.photo||'./icon-192.png'}">`}</div><div><h3>${esc(p.name)}</h3><p>${lab(p.type)} · ${sl(p.status)}</p><p>${esc(p.address||'Aucune adresse')}</p></div><button onclick="focusPoint('${p.id}')">Voir</button></div>`).join(""):"<p>Aucun point.</p>";$("listDialog").showModal()}
 window.focusPoint=id=>{let p=pts.find(x=>x.id===id);$("listDialog").close();map.setView([p.lat,p.lng],18);details(id)};$("listBtn").onclick=()=>list();$("navList").onclick=()=>list();$("navInspect").onclick=()=>list("inspection");$("closeList").onclick=()=>$("listDialog").close();$("moreBtn").onclick=()=>$("panel").classList.add("open");
 $("nearestBtn").onclick=()=>{if(!user)return toast("Activez votre position GPS");let a=pts.filter(p=>p.type==="hydrant"&&p.status!=="out");if(!a.length)return toast("Aucune borne disponible");a.sort((x,y)=>Math.hypot(x.lat-user[0],x.lng-user[1])-Math.hypot(y.lat-user[0],y.lng-user[1]));let p=a[0];$("panel").classList.remove("open");map.setView([p.lat,p.lng],18);details(p.id)};
 $("exportBtn").onclick=()=>{let fc={type:"FeatureCollection",features:pts.map(p=>({type:"Feature",geometry:{type:"Point",coordinates:[p.lng,p.lat]},properties:{...p,lat:undefined,lng:undefined}}))},b=new Blob([JSON.stringify(fc,null,2)],{type:"application/geo+json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`firemap-${new Date().toISOString().slice(0,10)}.geojson`;a.click()};
-$("importInput").onchange=async e=>{try{let d=JSON.parse(await e.target.files[0].text()),a=d.type==="FeatureCollection"?d.features.map(f=>({...f.properties,id:f.properties.id||uid(),lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]})):d;if(confirm(`Importer ${a.length} point(s)?`)){pts=[...pts,...a];save();render()}}catch{alert("Fichier invalide")}};$("clearBtn").onclick=()=>{if(confirm("Effacer toutes les données locales?")){pts=[];save();render()}};
+$("importInput").onchange=async e=>{try{let d=JSON.parse(await e.target.files[0].text()),a=d.type==="FeatureCollection"?d.features.map(f=>({...f.properties,id:f.properties.id||uid(),lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]})):d;if(confirm(`Importer ${a.length} point(s)?`)){pts=[...pts,...a];save();render();if(window.fireMapCloud?.configured)window.fireMapCloud.saveMany(a).catch(()=>toast("Importation en ligne impossible"))}}catch{alert("Fichier invalide")}};$("clearBtn").onclick=()=>{if(confirm("Effacer toutes les bornes sur tous les appareils?")){const ids=pts.map(p=>p.id);pts=[];save();render();if(window.fireMapCloud?.configured)window.fireMapCloud.deleteMany(ids).catch(()=>toast("Suppression en ligne impossible"))}};
 
 // Recherche d'adresses publique du Gouvernement du Québec
 const GOV_GEOCODER="https://servicescarto.mrnf.gouv.qc.ca/pes/rest/services/Territoire/Adresse_Geocodage/GeocodeServer/findAddressCandidates";let addressTimer=null,addressMarker=null;
@@ -37,4 +37,25 @@ function renderUnifiedResults(q,addresses){const hydrants=pts.filter(p=>normaliz
 $("searchInput").oninput=()=>{clearTimeout(addressTimer);const q=$("searchInput").value;render();if(q.trim().length<3){$("addressResults").classList.add("hidden");return}addressTimer=setTimeout(async()=>{$("addressResults").innerHTML='<div class="address-empty">Recherche des adresses…</div>';$("addressResults").classList.remove("hidden");renderUnifiedResults(q,await searchGovernmentAddresses(q))},500)};
 document.addEventListener("click",e=>{if(!$("addressResults").contains(e.target)&&e.target!==$("searchInput"))$("addressResults").classList.add("hidden")});
 
-render();if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js"));
+render();
+function setCloudStatus(text,state="offline"){
+  const el=$("cloudStatus");if(!el)return;el.textContent=text;el.dataset.state=state;
+}
+async function startCloud(){
+  const cloud=window.fireMapCloud;
+  if(!cloud?.configured){setCloudStatus("Local seulement","offline");return}
+  try{
+    setCloudStatus("Connexion…","syncing");
+    const local=(()=>{try{return JSON.parse(localStorage.getItem(K))||[]}catch{return[]}})();
+    if(local.length)await cloud.saveMany(local);
+    cloud.subscribe(remote=>{
+      const localById=new Map(pts.map(p=>[p.id,p]));
+      pts=remote.map(p=>({...p,photo:p.photo||localById.get(p.id)?.photo||""}));
+      localStorage.setItem(K,JSON.stringify(pts));render();
+      setCloudStatus("Synchronisé","online");
+    },()=>{setCloudStatus("Erreur Firebase","offline");toast("Connexion Firebase impossible")});
+  }catch(e){console.error(e);setCloudStatus("Erreur Firebase","offline");toast("Vérifiez la configuration Firebase")}
+}
+window.addEventListener("firemap-cloud-ready",startCloud,{once:true});
+if(window.fireMapCloud)startCloud();
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js"));

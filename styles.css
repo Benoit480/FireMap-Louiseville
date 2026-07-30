@@ -23,3 +23,10 @@
 .row-marker{width:48px;height:48px;display:flex;align-items:center;justify-content:center}.row-marker .hydrant-marker{transform:scale(.9)}
 .flow-badge{display:inline-flex;align-items:center;gap:6px}.flow-dot{width:12px;height:12px;border-radius:50%;display:inline-block}
 .address-results{left:0!important;right:0!important;top:calc(100% + 5px)!important}
+/* État de synchronisation Firebase */
+#cloudStatus{display:block;margin-top:2px;font-size:9px;font-style:normal;font-weight:700;letter-spacing:.04em;color:#9aa4b2}
+#cloudStatus::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;background:#687386}
+#cloudStatus[data-state="online"]{color:#6ee7a0}
+#cloudStatus[data-state="online"]::before{background:#35c76f;box-shadow:0 0 8px #35c76f}
+#cloudStatus[data-state="syncing"]{color:#ffd166}
+#cloudStatus[data-state="syncing"]::before{background:#ffb020}

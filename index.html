@@ -76,6 +76,18 @@
         <div class="assistant-address-row"><input id="assistantAddress" type="search" placeholder="Ex. 245 St-Laurent"><button id="assistantUseActive" class="secondary">Utiliser l’adresse active</button><button id="assistantLaunch" class="primary">Démarrer</button></div>
         <div id="assistantSuggestions" class="results"></div>
       </div>
+      <details id="smsImportCard" class="sms-import-card">
+        <summary>📩 Importer le SMS de répartition</summary>
+        <div class="sms-import-body">
+          <p>Copiez le message reçu de la répartition. FireMap détectera la nature de l’appel, l’adresse, le niveau d’alarme et les véhicules.</p>
+          <textarea id="dispatchSms" rows="5" placeholder="Collez ici le SMS de répartition…"></textarea>
+          <div class="sms-import-actions">
+            <button id="pasteDispatchSms" type="button" class="secondary">📋 Coller</button>
+            <button id="analyzeDispatchSms" type="button" class="primary">🚨 Créer l’appel actif</button>
+          </div>
+          <div id="dispatchPreview" class="dispatch-preview hidden" aria-live="polite"></div>
+        </div>
+      </details>
       <div id="assistantEmpty" class="assistant-empty"><span>🚒</span><h3>Prêt pour un départ d’appel</h3><p>Saisissez une adresse ou utilisez l’adresse déjà sélectionnée sur la carte.</p></div>
       <div id="assistantDashboard" class="hidden">
         <div class="assistant-alert-head"><div><small>INTERVENTION ACTIVE</small><h2 id="assistantActiveAddress"></h2><span id="assistantPreplanStatus"></span></div><button id="assistantNavigate" class="primary">➤ Navigation intégrée</button></div>

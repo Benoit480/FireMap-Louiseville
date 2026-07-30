@@ -24,7 +24,7 @@
   document.addEventListener("click",e=>{const a=e.target.closest("[data-assistant-address]");if(a){const item=$("assistantSuggestions")._items?.[Number(a.dataset.assistantAddress)];if(item)start(item)}const h=e.target.closest("[data-assistant-hydrant]");if(h){const p=I.getHydrants().find(x=>x.id===h.dataset.assistantHydrant);if(p){I.showView("map");I.map.setView([p.lat,p.lng],18);I.state.markers.get(p.id)?.openPopup()}}});
   $("assistantLaunch").onclick=()=>{const q=$("assistantAddress").value.trim();const nq=I.addressNorm(q);const a=I.getAddresses().find(x=>I.addressNorm(x.adresse)===nq)||I.getAddresses().find(x=>I.addressNorm(x.adresse).includes(nq));a?start(a):I.toast("Adresse introuvable dans la banque de Louiseville.")};
   $("assistantUseActive").onclick=()=>I.state.selected?start(I.state.selected):I.toast("Sélectionnez d’abord une adresse sur la carte.");
-  $("assistantNavigate").onclick=()=>active&&(location.href=I.navUrl(active.lat,active.lng));
+  $("assistantNavigate").onclick=()=>active&&window.fireMapNavigation?.start(active);
   $("assistantBackMap").onclick=()=>I.showView("map");
   $("assistantShowMap").onclick=()=>{if(!active)return;I.showView("map");const pts=[[active.lat,active.lng],...nearest.slice(0,3).map(p=>[p.lat,p.lng])];I.map.fitBounds(pts,{padding:[45,45]})};
   $("assistantOpenPreplan").onclick=()=>matchedBuilding&&window.fireMapPreplans?.openPreplanById(matchedBuilding.id);

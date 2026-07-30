@@ -78,10 +78,26 @@
       </div>
       <div id="assistantEmpty" class="assistant-empty"><span>🚒</span><h3>Prêt pour un départ d’appel</h3><p>Saisissez une adresse ou utilisez l’adresse déjà sélectionnée sur la carte.</p></div>
       <div id="assistantDashboard" class="hidden">
-        <div class="assistant-alert-head"><div><small>INTERVENTION ACTIVE</small><h2 id="assistantActiveAddress"></h2><span id="assistantPreplanStatus"></span></div><button id="assistantNavigate" class="primary">➤ Naviguer</button></div>
+        <div class="assistant-alert-head"><div><small>INTERVENTION ACTIVE</small><h2 id="assistantActiveAddress"></h2><span id="assistantPreplanStatus"></span></div><button id="assistantNavigate" class="primary">➤ Navigation intégrée</button></div>
         <div id="assistantCritical" class="assistant-critical-grid"></div>
         <section class="assistant-panel"><div class="assistant-panel-head"><h3>🚰 Bornes recommandées</h3><button id="assistantShowMap" class="secondary small">Voir sur la carte</button></div><div id="assistantHydrants" class="assistant-hydrant-list"></div></section>
         <section id="assistantPreplanPanel" class="assistant-panel hidden"><div class="assistant-panel-head"><h3>🏢 Préplan du bâtiment</h3><button id="assistantOpenPreplan" class="primary small">Ouvrir le préplan complet</button></div><div id="assistantPreplanSummary"></div></section>
+
+        <section id="integratedNavigation" class="navigation-panel hidden" aria-live="polite">
+          <div class="navigation-top">
+            <div><small>NAVIGATION GPS</small><h3 id="navigationDestination">Destination</h3></div>
+            <button id="navigationClose" class="icon-close" aria-label="Arrêter la navigation">×</button>
+          </div>
+          <div class="navigation-stats">
+            <div><strong id="navigationDistance">—</strong><span>Distance restante</span></div>
+            <div><strong id="navigationDuration">—</strong><span>Temps estimé</span></div>
+            <div><strong id="navigationAccuracy">—</strong><span>Précision GPS</span></div>
+          </div>
+          <div class="navigation-next"><span id="navigationTurnIcon">➤</span><div><small>PROCHAINE MANŒUVRE</small><strong id="navigationInstruction">Calcul du trajet…</strong><span id="navigationStepDistance"></span></div></div>
+          <div class="navigation-actions"><button id="navigationRecalculate" class="secondary">↻ Recalculer</button><button id="navigationExternal" class="secondary">↗ Apple Plans / Google Maps</button><button id="navigationStop" class="danger">Arrêter</button></div>
+          <details class="navigation-itinerary"><summary>Afficher les indications</summary><ol id="navigationSteps"></ol></details>
+          <p id="navigationStatus" class="navigation-status">Demande de localisation…</p>
+        </section>
         <div class="assistant-actions"><button id="assistantEnd" class="danger">Terminer l’intervention</button></div>
       </div>
     </section>
@@ -187,5 +203,6 @@
   <script src="app.js"></script>
   <script src="preplans.js"></script>
   <script src="assistant.js"></script>
+  <script src="navigation.js"></script>
 </body>
 </html>

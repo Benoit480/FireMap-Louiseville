@@ -30,3 +30,7 @@ Le fichier BDOA_QC_v1 fourni ne contenait aucune ligne attribuée à Louiseville
 
 ## Sécurité
 FireMap est un outil d'aide. Toute borne, adresse, pression ou capacité doit être validée par le service incendie et la municipalité avant un usage opérationnel.
+
+
+## Marqueurs de bornes
+La couleur de la borne représente le débit GPM. Le fond demeure noir. L’anneau extérieur représente le statut : vert disponible, orange à inspecter, rouge hors service.

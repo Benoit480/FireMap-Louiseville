@@ -46,8 +46,19 @@
         <button id="mapAddBtn" class="map-fab" title="Ajouter une borne">＋</button>
       </div>
       <div id="interventionCard" class="intervention-card hidden">
-        <div><small>INTERVENTION</small><strong id="selectedAddress"></strong><span id="nearestText">Choisissez une action</span></div>
-        <div class="action-row"><button id="nearestBtn" class="secondary">🚰 Borne proche</button><button id="gpsBtn" class="primary">➤ GPS</button></div>
+        <div class="intervention-head">
+          <div><small>INTERVENTION ACTIVE</small><strong id="selectedAddress"></strong><span id="nearestText">Calcul des ressources à proximité…</span></div>
+          <button id="clearIntervention" class="icon-close" aria-label="Fermer l’intervention">×</button>
+        </div>
+        <div class="action-row"><button id="nearestBtn" class="secondary">🚰 Afficher les bornes</button><button id="gpsBtn" class="primary">➤ Départ GPS</button></div>
+        <div class="nearest-panel">
+          <h3>3 bornes les plus proches</h3>
+          <div id="nearestList" class="nearest-list"></div>
+        </div>
+      </div>
+      <div class="recent-card">
+        <div class="recent-head"><strong>Interventions récentes</strong><button id="clearHistory" class="text-btn">Effacer</button></div>
+        <div id="recentInterventions" class="recent-list"></div>
       </div>
     </section>
 

@@ -1,8 +1,14 @@
-# FireMap Louiseville V2
+# FireMap Louiseville V3 — Mode intervention
 
-Application Web progressive du Service incendie de Louiseville.
+Cette version ajoute le mode intervention opérationnel :
 
-Fonctions : carte opérationnelle, recherche des 5 218 adresses officielles, navigation GPS, borne la plus proche, ancien menu opérationnel, liste des bornes, inspections, ajout/modification/suppression et synchronisation Firestore entre appareils.
+- sélection d’une adresse officielle;
+- marqueur d’intervention rouge;
+- calcul et affichage des trois bornes actives les plus proches;
+- distances approximatives en ligne droite;
+- boutons Carte et GPS pour chaque borne;
+- lignes visuelles entre l’intervention et les bornes;
+- historique local des huit dernières interventions;
+- conservation de l’ajout, de la modification, des inspections et de la synchronisation Firebase.
 
-## Mise à jour GitHub Pages
-Téléverser tous les fichiers à la racine du dépôt, puis attendre 1 à 3 minutes. Sur iPhone, ouvrir Safari et actualiser; si une ancienne version persiste, supprimer l’icône de l’écran d’accueil puis l’ajouter de nouveau.
+Téléversez tous les fichiers à la racine du dépôt GitHub Pages.

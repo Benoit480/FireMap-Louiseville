@@ -5,6 +5,20 @@
   const $=id=>document.getElementById(id), esc=I.esc, norm=I.norm;
   const layer=L.layerGroup().addTo(I.map);
   let buildings=[], markers=new Map(), pendingMapPoint=null;
+  const BUILDINGS_CACHE_KEY="firemap-batiments-v1";
+  const BUILDINGS_PENDING_KEY="firemap-batiments-pending-v1";
+  const BUILDINGS_MIGRATED_KEY="firemap-batiments-cloud-migrated-v1";
+  let cloudUnsubscribe=null, cloudConnected=false;
+  function readJson(key,fallback){try{return JSON.parse(localStorage.getItem(key)||"")||fallback}catch(_){return fallback}}
+  function writeJson(key,value){try{localStorage.setItem(key,JSON.stringify(value))}catch(e){console.warn("Stockage local indisponible",e)}}
+  function loadCachedBuildings(){const list=readJson(BUILDINGS_CACHE_KEY,[]);return Array.isArray(list)?list:[]}
+  function saveCachedBuildings(list){writeJson(BUILDINGS_CACHE_KEY,list)}
+  function getPending(){const p=readJson(BUILDINGS_PENDING_KEY,{save:{},delete:{}});return {save:p?.save||{},delete:p?.delete||{}}}
+  function setPending(p){writeJson(BUILDINGS_PENDING_KEY,p)}
+  function queueSave(b){const p=getPending();p.save[b.id]=b;delete p.delete[b.id];setPending(p)}
+  function queueDelete(id){const p=getPending();delete p.save[id];p.delete[id]=true;setPending(p)}
+  function clearPendingSave(id){const p=getPending();delete p.save[id];setPending(p)}
+  function clearPendingDelete(id){const p=getPending();delete p.delete[id];setPending(p)}
   const categoryLabel={school:"École",care:"CHSLD / résidence",industry:"Industrie",commercial:"Commerce",gas_station:"Station-service",municipal:"Municipal",hazmat:"Matières dangereuses",other:"Autre"};
   const categoryIcon={school:"🏫",care:"🏥",industry:"🏭",commercial:"🏢",gas_station:"⛽",municipal:"🏛️",hazmat:"☣️",other:"🏢"};
   const riskLabel={low:"Faible",medium:"Moyen",high:"Élevé",very_high:"Très élevé"};
@@ -14,13 +28,13 @@
   function icon(b){const c=riskColor[b.risk]||"#ff9500",emoji=categoryIcon[b.category]||"🏢";return L.divIcon({className:"building-div-icon",html:`<div class="building-marker" style="--risk:${c}"><span>${emoji}</span></div>`,iconSize:[32,38],iconAnchor:[16,34],popupAnchor:[0,-32]})}
   function renderMarkers(){layer.clearLayers();markers.clear();buildings.forEach(b=>{if(!isFinite(b.lat)||!isFinite(b.lng))return;const m=L.marker([b.lat,b.lng],{icon:icon(b)}).bindPopup(`<strong>${esc(b.name)}</strong><br>${esc(b.address)}<br><span class="risk-badge ${b.risk}">${riskLabel[b.risk]}</span><br><button data-open-preplan="${esc(b.id)}">Ouvrir le préplan</button>`).addTo(layer);markers.set(b.id,m)})}
   function renderList(){const q=norm($("buildingSearch").value),rf=$("riskFilter").value;const list=buildings.filter(b=>(!rf||b.risk===rf)&&(!q||norm(Object.values(b).join(" ")).includes(q))).sort((a,b)=>a.name.localeCompare(b.name,"fr"));$("buildingList").innerHTML=list.map(b=>`<article class="card-item building-card"><div class="building-list-icon" style="--risk:${riskColor[b.risk]}">${categoryIcon[b.category]}</div><div class="card-content"><h3>${esc(b.name)}</h3><span class="risk-badge ${b.risk}">${riskLabel[b.risk]}</span><p>${esc(b.address)||"Adresse non inscrite"}</p><p>${categoryLabel[b.category]} · ${b.floors||"?"} étage(s)</p><div class="card-actions"><button class="secondary" data-show-building="${esc(b.id)}">Voir</button><button class="secondary" data-edit-building="${esc(b.id)}">Modifier</button><button class="primary" data-nav-building="${esc(b.id)}">GPS</button></div></div></article>`).join("")||'<div class="card-item">Aucun bâtiment enregistré.</div>'}
-  function setBuildings(items){buildings=items.map(canonical);renderMarkers();renderList()}
+  function setBuildings(items,{persist=true}={}){buildings=items.map(canonical);if(persist)saveCachedBuildings(buildings);renderMarkers();renderList()}
   function openChoice(point=null){if(point){pendingMapPoint={lat:Number(point.lat),lng:Number(point.lng)};I.state.lastMapClick={...pendingMapPoint}}else pendingMapPoint=null;$("addChoiceDialog").showModal() }
   function mapPoint(){return pendingMapPoint||I.state.lastMapClick||I.state.user||{lat:I.map.getCenter().lat,lng:I.map.getCenter().lng}}
   function openForm(b=null){const p=mapPoint();$("buildingModalTitle").textContent=b?`Modifier — ${b.name}`:"Ajouter un bâtiment à risque";$("buildingId").value=b?.id||"";$("buildingName").value=b?.name||"";$("buildingCategory").value=b?.category||"other";$("buildingAddress").value=b?.address||I.nearestAddress?.(p)||I.state.selected?.adresse||"";$("buildingLat").value=b?.lat??I.state.selected?.lat??p.lat.toFixed(7);$("buildingLng").value=b?.lng??I.state.selected?.lng??p.lng.toFixed(7);$("buildingRisk").value=b?.risk||"high";$("buildingFloors").value=b?.floors||1;$("buildingBasement").value=b?.basement||"no";$("buildingRisks").value=b?.risks||"";$("buildingFdc").value=b?.fdc||"";$("buildingElectrical").value=b?.electrical||"";$("buildingGas").value=b?.gas||"";$("buildingHazmat").value=b?.hazmat||"";$("buildingAccess").value=b?.access||"";$("buildingAssembly").value=b?.assembly||"";$("buildingAttackSide").value=b?.attackSide||"";$("buildingContactName").value=b?.contactName||"";$("buildingContactPhone").value=b?.contactPhone||"";$("buildingPlanUrl").value=b?.planUrl||"";$("buildingPhotoUrls").value=(b?.photoUrls||[]).join("\n");$("buildingNotes").value=b?.notes||"";$("deleteBuilding").classList.toggle("hidden",!b);$("buildingDialog").showModal()}
   function fromForm(){return canonical({id:$("buildingId").value||uid(),name:$("buildingName").value,address:$("buildingAddress").value,lat:$("buildingLat").value,lng:$("buildingLng").value,category:$("buildingCategory").value,risk:$("buildingRisk").value,floors:$("buildingFloors").value,basement:$("buildingBasement").value,risks:$("buildingRisks").value,fdc:$("buildingFdc").value,electrical:$("buildingElectrical").value,gas:$("buildingGas").value,hazmat:$("buildingHazmat").value,access:$("buildingAccess").value,assembly:$("buildingAssembly").value,attackSide:$("buildingAttackSide").value,contactName:$("buildingContactName").value,contactPhone:$("buildingContactPhone").value,planUrl:$("buildingPlanUrl").value,photoUrls:$("buildingPhotoUrls").value,notes:$("buildingNotes").value})}
-  async function save(){const b=fromForm();if(!b.name.trim()||!b.address.trim())return I.toast("Nom et adresse requis.");if(!isFinite(b.lat)||!isFinite(b.lng))return I.toast("Coordonnées invalides.");const i=buildings.findIndex(x=>x.id===b.id);if(i>=0)buildings[i]=b;else buildings.push(b);setBuildings(buildings);$("buildingDialog").close();try{await window.fireMapCloud?.saveBuilding?.(b);I.toast("Préplan enregistré et synchronisé.")}catch(e){console.error(e);I.toast("Préplan enregistré localement seulement.")}}
-  async function remove(){const id=$("buildingId").value;if(!id||!confirm("Supprimer définitivement ce bâtiment et son préplan?"))return;buildings=buildings.filter(b=>b.id!==id);setBuildings(buildings);$("buildingDialog").close();try{await window.fireMapCloud?.deleteBuilding?.(id);I.toast("Bâtiment supprimé.")}catch(e){I.toast("Suppression locale seulement.")}}
+  async function save(){const b=fromForm();if(!b.name.trim()||!b.address.trim())return I.toast("Nom et adresse requis.");if(!isFinite(b.lat)||!isFinite(b.lng))return I.toast("Coordonnées invalides.");const i=buildings.findIndex(x=>x.id===b.id);if(i>=0)buildings[i]=b;else buildings.push(b);queueSave(b);setBuildings(buildings);$("buildingDialog").close();const c=window.fireMapCloud;try{if(!c?.configured||!c.saveBuilding)throw new Error("Firebase pas encore prêt");await c.saveBuilding(b);clearPendingSave(b.id);I.toast("Préplan enregistré et synchronisé.")}catch(e){console.error(e);I.toast("Préplan sauvegardé sur cet appareil; synchronisation automatique en attente.")}}
+  async function remove(){const id=$("buildingId").value;if(!id||!confirm("Supprimer définitivement ce bâtiment et son préplan?"))return;buildings=buildings.filter(b=>b.id!==id);queueDelete(id);setBuildings(buildings);$("buildingDialog").close();const c=window.fireMapCloud;try{if(!c?.configured||!c.deleteBuilding)throw new Error("Firebase pas encore prêt");await c.deleteBuilding(id);clearPendingDelete(id);I.toast("Bâtiment supprimé et synchronisé.")}catch(e){console.error(e);I.toast("Suppression enregistrée; synchronisation automatique en attente.")}}
   function section(title,icon,text){if(!text)return "";return `<section class="preplan-section"><h3>${icon} ${title}</h3><p>${esc(text).replace(/\n/g,"<br>")}</p></section>`}
   function openPreplan(b){if(!b)return;const photos=(b.photoUrls||[]).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Photo du bâtiment" loading="lazy"></a>`).join("");$("preplanContent").innerHTML=`<div class="modal-head"><div><small>PRÉPLAN OPÉRATIONNEL</small><h2>${esc(b.name)}</h2></div><button type="button" data-close-preplan>×</button></div><div class="preplan-hero"><div class="building-list-icon large" style="--risk:${riskColor[b.risk]}">${categoryIcon[b.category]}</div><div><strong>${esc(b.address)}</strong><span>${categoryLabel[b.category]} · Risque ${riskLabel[b.risk]} · ${b.floors||"?"} étage(s)</span></div></div><div class="preplan-actions"><button class="primary" data-nav-building="${esc(b.id)}">➤ Naviguer</button><button class="secondary" data-map-building="${esc(b.id)}">🗺️ Voir sur la carte</button>${b.planUrl?`<a class="button-link primary" href="${esc(b.planUrl)}" target="_blank" rel="noopener">📄 Ouvrir le plan</a>`:""}</div><div class="preplan-grid">${section("Risques particuliers","⚠️",b.risks)}${section("FDC / prise pompier","💧",b.fdc)}${section("Électricité","⚡",b.electrical)}${section("Gaz / propane","🔥",b.gas)}${section("Matières dangereuses","☣️",b.hazmat)}${section("Accès pompier","🚪",b.access)}${section("Point de rassemblement","📍",b.assembly)}${section("Côté d’attaque conseillé","🚒",b.attackSide)}${section("Responsable","👤",[b.contactName,b.contactPhone].filter(Boolean).join(" — "))}${section("Notes opérationnelles","📝",b.notes)}</div>${photos?`<section class="preplan-section"><h3>📷 Photos</h3><div class="photo-grid">${photos}</div></section>`:""}<div class="modal-actions"><button class="secondary" data-edit-building="${esc(b.id)}">Modifier</button><button class="primary" data-close-preplan>Fermer</button></div>`;$("preplanDialog").showModal()}
   function showOnMap(b){$("preplanDialog").close();I.showView("map");I.map.setView([b.lat,b.lng],18);markers.get(b.id)?.openPopup()}
@@ -81,5 +95,36 @@
   window.fireMapPreplans={getBuildings:()=>buildings.slice(),openPreplanById:id=>openPreplan(buildings.find(b=>b.id===id)),showBuildingOnMap:id=>{const b=buildings.find(x=>x.id===id);if(b)showOnMap(b)}};
   window.dispatchEvent(new Event("firemap-preplans-ready"));
 
-  const connect=()=>{const c=window.fireMapCloud;if(!c?.configured||!c.subscribeBuildings){setBuildings([]);return}c.subscribeBuildings(setBuildings,e=>{console.error(e);I.toast("Erreur de synchronisation des bâtiments.")})};if(window.fireMapCloud)connect();else window.addEventListener("firemap-cloud-ready",connect,{once:true});
+  async function flushPending(c){
+    const p=getPending();
+    for(const [id,b] of Object.entries(p.save)){try{await c.saveBuilding(b);clearPendingSave(id)}catch(e){console.error("Échec sync bâtiment",id,e)}}
+    for(const id of Object.keys(p.delete)){try{await c.deleteBuilding(id);clearPendingDelete(id)}catch(e){console.error("Échec suppression bâtiment",id,e)}}
+  }
+  const connect=()=>{
+    const c=window.fireMapCloud;
+    if(!c?.configured||!c.subscribeBuildings){cloudConnected=false;I.toast("Bâtiments en mode local : Firebase indisponible.");return}
+    cloudConnected=true;
+    if(cloudUnsubscribe)cloudUnsubscribe();
+    let firstSnapshot=true;
+    cloudUnsubscribe=c.subscribeBuildings(async cloudItems=>{
+      const pending=getPending();
+      const cloudMap=new Map(cloudItems.map(x=>[String(x.id),canonical(x)]));
+      // Au premier branchement, transférer une seule fois les anciens bâtiments locaux vers Firestore.
+      if(firstSnapshot && localStorage.getItem(BUILDINGS_MIGRATED_KEY)!=="yes"){
+        for(const b of buildings){if(!cloudMap.has(b.id) && !pending.delete[b.id])queueSave(b)}
+        localStorage.setItem(BUILDINGS_MIGRATED_KEY,"yes");
+      }
+      firstSnapshot=false;
+      // Garder visibles les écritures locales encore en attente jusqu'à confirmation du serveur.
+      const nowPending=getPending();
+      Object.entries(nowPending.save).forEach(([id,b])=>cloudMap.set(id,canonical(b)));
+      Object.keys(nowPending.delete).forEach(id=>cloudMap.delete(id));
+      setBuildings([...cloudMap.values()]);
+      await flushPending(c);
+    },e=>{cloudConnected=false;console.error(e);I.toast("Erreur de synchronisation des bâtiments; copie locale conservée.")});
+    flushPending(c);
+  };
+  setBuildings(loadCachedBuildings());
+  if(window.fireMapCloud)connect();else window.addEventListener("firemap-cloud-ready",connect,{once:true});
+  window.addEventListener("online",()=>{if(window.fireMapCloud?.configured){connect()}});
 })();

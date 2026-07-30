@@ -22,3 +22,7 @@ La recherche accepte maintenant les adresses sans type de voie et les abréviati
 - `80 St-Paul` trouve `80 Rue Saint-Paul`
 - `Ste-Élisabeth` trouve `Sainte-Élisabeth`
 - `boul`, `av`, `ch` et `rte` sont aussi reconnus
+
+
+## Ajout rapide sur la carte
+Double-cliquez sur ordinateur ou double-touchez sur téléphone à l’endroit voulu. Choisissez ensuite **borne-fontaine** ou **bâtiment à risque**. Les coordonnées GPS et, lorsqu’une adresse est proche, l’adresse sont préremplies.

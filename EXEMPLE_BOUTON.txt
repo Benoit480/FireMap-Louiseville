@@ -1,7 +1,0 @@
-import 'screens/recherche_adresse_page.dart';
-
-Navigator.of(context).push(
-  MaterialPageRoute(
-    builder: (_) => const RechercheAdressePage(),
-  ),
-);

@@ -1,61 +1,320 @@
-const K="firemap_v2_points";
-const map=L.map("map",{zoomControl:false}).setView([46.2556,-72.9415],14);
-L.control.zoom({position:"bottomright"}).addTo(map);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
-let pts=(()=>{try{return JSON.parse(localStorage.getItem(K))||[]}catch{return[]}})(),marks=new Map(),sel=null,pending=null,user=null,filter="all",activeOnly=false;
-const $=x=>document.getElementById(x),save=()=>{localStorage.setItem(K,JSON.stringify(pts));stats()},uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random();
-const lab=t=>({hydrant:"Borne-fontaine",water:"Point d’eau",risk:"Bâtiment à risque",station:"Caserne"}[t]||t),sl=s=>({active:"Disponible",inspection:"À inspecter",out:"Hors service"}[s]||s),esc=s=>String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-const FLOW={red:{label:"Rouge — moins de 500 GPM",short:"< 500 GPM",hex:"#ef2b32"},orange:{label:"Orange — 500 à 999 GPM",short:"500 à 999 GPM",hex:"#ff9418"},green:{label:"Vert — 1 000 à 1 499 GPM",short:"1 000 à 1 499 GPM",hex:"#52c92f"},blue:{label:"Bleu — 1 500 GPM et plus",short:"≥ 1 500 GPM",hex:"#2186ff"}};
-function flowKey(p){if(["red","orange","green","blue"].includes(p.flow))return p.flow;const n=Number(p.flow);if(Number.isFinite(n)&&n>0)return n<500?"red":n<1000?"orange":n<1500?"green":"blue";return "red"}
-function toast(m){$("toast").textContent=m;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1800)}
-function stats(){$("s1").textContent=pts.filter(p=>p.type==="hydrant").length;$("s2").textContent=pts.filter(p=>p.status==="inspection").length;$("s3").textContent=pts.filter(p=>p.status==="out").length}
-function hydrantHTML(p){const f=flowKey(p),s=["active","inspection","out"].includes(p.status)?p.status:"active";return `<div class="hydrant-marker flow-${f} status-${s}" title="${esc(FLOW[f].label)} — ${esc(sl(s))}"><span class="hydrant-shape"></span></div>`}
-function icon(p){if(p.type==="hydrant")return L.divIcon({className:"",html:hydrantHTML(p),iconSize:[44,44],iconAnchor:[22,22]});let symbol=p.type==="water"?"🌊":p.type==="risk"?"🏭":"🚒";return L.divIcon({className:"",html:`<div class="generic-marker status-${p.status||"active"}">${symbol}</div>`,iconSize:[36,36],iconAnchor:[18,18]})}
-function render(){marks.forEach(m=>map.removeLayer(m));marks.clear();let q=$("searchInput").value.toLowerCase();pts.filter(p=>(filter==="all"||p.type===filter)&&(!activeOnly||p.status==="active")&&(!q||(`${p.name} ${p.address} ${p.notes}`).toLowerCase().includes(q))).forEach(p=>{let m=L.marker([p.lat,p.lng],{icon:icon(p)}).addTo(map);m.on("click",()=>details(p.id));marks.set(p.id,m)});stats()}
-function details(id){let p=pts.find(x=>x.id===id);if(!p)return;sel=p;$("dname").textContent=p.name;$("daddress").textContent=p.address||`${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`;const f=FLOW[flowKey(p)];$("dflow").innerHTML=`<span class="flow-badge"><i class="flow-dot" style="background:${f.hex}"></i>${f.short}</span>`;$("doutlet").textContent=p.outlet||"—";$("dstatusText").textContent=sl(p.status);$("dinspection").textContent=p.inspection||"—";$("dnotes").textContent=p.notes||"Aucune note.";$("dstatus").textContent=sl(p.status);$("dstatus").style.background=p.status==="active"?"#1c6533":p.status==="inspection"?"#75500c":"#7e161b";if(p.photo){$("dphoto").src=p.photo;$("dphoto").classList.remove("hidden")}else $("dphoto").classList.add("hidden");$("details").classList.remove("hidden")}
-function reset(){$("pointForm").reset();$("pointId").value="";$("deleteBtn").classList.add("hidden");$("dialogTitle").textContent="Ajouter une borne"}
-function add(ll){reset();$("lat").value=ll.lat.toFixed(6);$("lng").value=ll.lng.toFixed(6);$("inspection").value=new Date().toISOString().slice(0,10);$("pointDialog").showModal()}
-function edit(id){let p=pts.find(x=>x.id===id);$("dialogTitle").textContent="Modifier le point";for(let k of ["type","name","address","status","inspection","notes","lat","lng"])$(k).value=p[k]||"";$("flow").value=flowKey(p);$("outlet").value=p.outlet||"1 × 4 po + 2 × 2,5 po";$("pointId").value=p.id;$("deleteBtn").classList.remove("hidden");$("pointDialog").showModal()}
-async function img(file){return new Promise(r=>{let fr=new FileReader();fr.onload=()=>{let im=new Image();im.onload=()=>{let q=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*q;c.height=im.height*q;c.getContext("2d").drawImage(im,0,0,c.width,c.height);r(c.toDataURL("image/jpeg",.72))};im.src=fr.result};fr.readAsDataURL(file)})}
-map.on("click",e=>pending=e.latlng);map.on("contextmenu",e=>add(e.latlng));
-$("menuBtn").onclick=()=>$("panel").classList.add("open");$("closePanel").onclick=()=>$("panel").classList.remove("open");$("filterBtn").onclick=()=>$("filters").classList.add("open");$("closeFilters").onclick=()=>$("filters").classList.remove("open");$("closeDetails").onclick=()=>$("details").classList.add("hidden");$("addBtn").onclick=()=>add(pending||{lat:user?.[0]||map.getCenter().lat,lng:user?.[1]||map.getCenter().lng});$("cancelBtn").onclick=()=>$("pointDialog").close();$("editBtn").onclick=()=>sel&&edit(sel.id);$("navBtn").onclick=()=>sel&&open(`https://www.google.com/maps/dir/?api=1&destination=${sel.lat},${sel.lng}`,"_blank");
-$("locateBtn").onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{user=[p.coords.latitude,p.coords.longitude];map.setView(user,17);L.circleMarker(user,{radius:8,color:"white",fillColor:"#1689ff",fillOpacity:1,weight:3}).addTo(map)},()=>toast("Position impossible"),{enableHighAccuracy:true}):toast("GPS non disponible");
-$("pointForm").onsubmit=async e=>{e.preventDefault();let id=$("pointId").value||uid(),old=pts.find(p=>p.id===id),photo=old?.photo||"",f=$("photo").files[0];if(f)photo=await img(f);let p={id,type:$("type").value,name:$("name").value.trim(),address:$("address").value.trim(),flow:$("flow").value,outlet:$("outlet").value,status:$("status").value,inspection:$("inspection").value,notes:$("notes").value.trim(),lat:+$("lat").value,lng:+$("lng").value,photo};let i=pts.findIndex(x=>x.id===id);i>=0?pts[i]=p:pts.push(p);save();render();$("pointDialog").close();details(id);toast("Point enregistré");if(window.fireMapCloud?.configured)window.fireMapCloud.savePoint(p).catch(()=>toast("Sauvegarde en ligne impossible"))};
-$("deleteBtn").onclick=()=>{let id=$("pointId").value;if(confirm("Supprimer ce point?")){pts=pts.filter(p=>p.id!==id);save();render();$("pointDialog").close();$("details").classList.add("hidden");if(window.fireMapCloud?.configured)window.fireMapCloud.deletePoint(id).catch(()=>toast("Suppression en ligne impossible"))}};
-document.querySelectorAll(".chips button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".chips button").forEach(x=>x.classList.remove("active"));b.classList.add("active");filter=b.dataset.f;render()});$("activeOnly").onchange=e=>{activeOnly=e.target.checked;render()};
-function list(mode="all"){$("listTitle").textContent=mode==="inspection"?"Inspections requises":"Points cartographiés";let a=mode==="inspection"?pts.filter(p=>p.status==="inspection"):pts;$("pointsList").innerHTML=a.length?a.map(p=>`<div class="row"><div class="row-marker">${p.type==="hydrant"?hydrantHTML(p):`<img src="${p.photo||'./icon-192.png'}">`}</div><div><h3>${esc(p.name)}</h3><p>${lab(p.type)} · ${sl(p.status)}</p><p>${esc(p.address||'Aucune adresse')}</p></div><button onclick="focusPoint('${p.id}')">Voir</button></div>`).join(""):"<p>Aucun point.</p>";$("listDialog").showModal()}
-window.focusPoint=id=>{let p=pts.find(x=>x.id===id);$("listDialog").close();map.setView([p.lat,p.lng],18);details(id)};$("listBtn").onclick=()=>list();$("navList").onclick=()=>list();$("navInspect").onclick=()=>list("inspection");$("closeList").onclick=()=>$("listDialog").close();$("moreBtn").onclick=()=>$("panel").classList.add("open");
-$("nearestBtn").onclick=()=>{if(!user)return toast("Activez votre position GPS");let a=pts.filter(p=>p.type==="hydrant"&&p.status!=="out");if(!a.length)return toast("Aucune borne disponible");a.sort((x,y)=>Math.hypot(x.lat-user[0],x.lng-user[1])-Math.hypot(y.lat-user[0],y.lng-user[1]));let p=a[0];$("panel").classList.remove("open");map.setView([p.lat,p.lng],18);details(p.id)};
-$("exportBtn").onclick=()=>{let fc={type:"FeatureCollection",features:pts.map(p=>({type:"Feature",geometry:{type:"Point",coordinates:[p.lng,p.lat]},properties:{...p,lat:undefined,lng:undefined}}))},b=new Blob([JSON.stringify(fc,null,2)],{type:"application/geo+json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`firemap-${new Date().toISOString().slice(0,10)}.geojson`;a.click()};
-$("importInput").onchange=async e=>{try{let d=JSON.parse(await e.target.files[0].text()),a=d.type==="FeatureCollection"?d.features.map(f=>({...f.properties,id:f.properties.id||uid(),lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]})):d;if(confirm(`Importer ${a.length} point(s)?`)){pts=[...pts,...a];save();render();if(window.fireMapCloud?.configured)window.fireMapCloud.saveMany(a).catch(()=>toast("Importation en ligne impossible"))}}catch{alert("Fichier invalide")}};$("clearBtn").onclick=()=>{if(confirm("Effacer toutes les bornes sur tous les appareils?")){const ids=pts.map(p=>p.id);pts=[];save();render();if(window.fireMapCloud?.configured)window.fireMapCloud.deleteMany(ids).catch(()=>toast("Suppression en ligne impossible"))}};
+(() => {
+  "use strict";
 
-// Recherche d'adresses publique du Gouvernement du Québec
-const GOV_GEOCODER="https://servicescarto.mrnf.gouv.qc.ca/pes/rest/services/Territoire/Adresse_Geocodage/GeocodeServer/findAddressCandidates";let addressTimer=null,addressMarker=null;
-function normalizeText(s=""){return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}
-async function searchGovernmentAddresses(query){if(query.trim().length<3)return [];const params=new URLSearchParams({SingleLine:`${query}, Louiseville, Québec`,f:"json",outFields:"*",maxLocations:"8",searchExtent:"-73.08,46.17,-72.82,46.35",outSR:"4326"});try{const r=await fetch(`${GOV_GEOCODER}?${params}`);if(!r.ok)throw new Error();const data=await r.json();return (data.candidates||[]).filter(c=>c.location&&c.location.x>-73.08&&c.location.x<-72.82&&c.location.y>46.17&&c.location.y<46.35).map(c=>({label:c.address,lat:c.location.y,lng:c.location.x}))}catch{return []}}
-function renderUnifiedResults(q,addresses){const hydrants=pts.filter(p=>normalizeText(`${p.name} ${p.address||""}`).includes(normalizeText(q))).slice(0,5);const items=[...hydrants.map(p=>({kind:"point",label:p.name,sub:p.address||lab(p.type),id:p.id})),...addresses.map(a=>({kind:"address",label:a.label,sub:"Adresse — Gouvernement du Québec",lat:a.lat,lng:a.lng}))];const c=$("addressResults");if(!items.length){c.innerHTML='<div class="address-empty">Aucun résultat trouvé.</div>';c.classList.remove("hidden");return}c.innerHTML=items.map((x,i)=>`<button class="address-result-v3" data-i="${i}"><span>${x.kind==="point"?"🚰":"📍"}</span><span><strong>${esc(x.label)}</strong><small>${esc(x.sub)}</small></span></button>`).join("");c.classList.remove("hidden");c.querySelectorAll("button").forEach(btn=>btn.onclick=()=>{const x=items[Number(btn.dataset.i)];c.classList.add("hidden");if(x.kind==="point"){const p=pts.find(v=>v.id===x.id);map.setView([p.lat,p.lng],18);details(p.id);return}pending={lat:x.lat,lng:x.lng};if(addressMarker)map.removeLayer(addressMarker);addressMarker=L.marker([x.lat,x.lng]).addTo(map).bindPopup(`<strong>${esc(x.label)}</strong><br>Utilisez + pour ajouter une borne.`).openPopup();map.setView([x.lat,x.lng],18);$("searchInput").value=x.label})}
-$("searchInput").oninput=()=>{clearTimeout(addressTimer);const q=$("searchInput").value;render();if(q.trim().length<3){$("addressResults").classList.add("hidden");return}addressTimer=setTimeout(async()=>{$("addressResults").innerHTML='<div class="address-empty">Recherche des adresses…</div>';$("addressResults").classList.remove("hidden");renderUnifiedResults(q,await searchGovernmentAddresses(q))},500)};
-document.addEventListener("click",e=>{if(!$("addressResults").contains(e.target)&&e.target!==$("searchInput"))$("addressResults").classList.add("hidden")});
+  const LOUISEVILLE_CENTER = [46.2563, -72.9417];
+  const ADDRESS_FILE = "louiseville_adresses.json";
+  const HYDRANT_FILES = [
+    "firemap-2026-07-30 2.geojson",
+    "firemap-2026-07-30.geojson",
+    "bornes-fontaines.geojson"
+  ];
 
-render();
-function setCloudStatus(text,state="offline"){
-  const el=$("cloudStatus");if(!el)return;el.textContent=text;el.dataset.state=state;
-}
-async function startCloud(){
-  const cloud=window.fireMapCloud;
-  if(!cloud?.configured){setCloudStatus("Local seulement","offline");return}
-  try{
-    setCloudStatus("Connexion…","syncing");
-    const local=(()=>{try{return JSON.parse(localStorage.getItem(K))||[]}catch{return[]}})();
-    if(local.length)await cloud.saveMany(local);
-    cloud.subscribe(remote=>{
-      const localById=new Map(pts.map(p=>[p.id,p]));
-      pts=remote.map(p=>({...p,photo:p.photo||localById.get(p.id)?.photo||""}));
-      localStorage.setItem(K,JSON.stringify(pts));render();
-      setCloudStatus("Synchronisé","online");
-    },()=>{setCloudStatus("Erreur Firebase","offline");toast("Connexion Firebase impossible")});
-  }catch(e){console.error(e);setCloudStatus("Erreur Firebase","offline");toast("Vérifiez la configuration Firebase")}
-}
-window.addEventListener("firemap-cloud-ready",startCloud,{once:true});
-if(window.fireMapCloud)startCloud();
-if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js"));
+  const state = {
+    addresses: [],
+    selected: null,
+    userPosition: null,
+    hydrants: [],
+    hydrantLayer: null,
+    selectedMarker: null,
+    userMarker: null,
+    deferredInstall: null
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    input: $("addressSearch"),
+    clear: $("clearSearch"),
+    results: $("results"),
+    status: $("searchStatus"),
+    selectedPanel: $("selectedPanel"),
+    selectedAddress: $("selectedAddress"),
+    selectedCoords: $("selectedCoords"),
+    start: $("startBtn"),
+    openSelected: $("openSelectedBtn"),
+    nearestHydrant: $("nearestHydrantBtn"),
+    locate: $("locateBtn"),
+    hydrantCount: $("hydrantCount"),
+    hydrantToggle: $("hydrantToggle"),
+    toast: $("toast"),
+    install: $("installBtn")
+  };
+
+  const map = L.map("map", { zoomControl: true }).setView(LOUISEVILLE_CENTER, 14);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 20,
+    attribution: "&copy; OpenStreetMap"
+  }).addTo(map);
+
+  function normalize(value = "") {
+    return value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function toast(message) {
+    el.toast.textContent = message;
+    el.toast.classList.remove("hidden");
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => el.toast.classList.add("hidden"), 2600);
+  }
+
+  async function loadAddresses() {
+    try {
+      const response = await fetch(ADDRESS_FILE, { cache: "no-cache" });
+      if (!response.ok) throw new Error("Fichier introuvable");
+      state.addresses = await response.json();
+      el.status.textContent = `${state.addresses.length.toLocaleString("fr-CA")} adresses chargées`;
+    } catch (error) {
+      el.status.textContent = "Impossible de charger les adresses.";
+      toast("Vérifie que louiseville_adresses.json est dans le dépôt.");
+      console.error(error);
+    }
+  }
+
+  function getCoordsFromFeature(feature) {
+    if (!feature || !feature.geometry) return null;
+    const g = feature.geometry;
+    if (g.type === "Point" && Array.isArray(g.coordinates)) {
+      return { lat: Number(g.coordinates[1]), lng: Number(g.coordinates[0]) };
+    }
+    return null;
+  }
+
+  async function loadHydrants() {
+    let geojson = null;
+    for (const filename of HYDRANT_FILES) {
+      try {
+        const response = await fetch(filename, { cache: "no-cache" });
+        if (response.ok) {
+          geojson = await response.json();
+          break;
+        }
+      } catch (_) {}
+    }
+
+    if (!geojson) {
+      el.hydrantCount.textContent = "Aucun fichier de bornes trouvé";
+      return;
+    }
+
+    const features = geojson.features || [];
+    state.hydrants = features
+      .map((feature, index) => {
+        const coords = getCoordsFromFeature(feature);
+        if (!coords || Number.isNaN(coords.lat) || Number.isNaN(coords.lng)) return null;
+        return {
+          id: feature.id || index,
+          lat: coords.lat,
+          lng: coords.lng,
+          properties: feature.properties || {}
+        };
+      })
+      .filter(Boolean);
+
+    state.hydrantLayer = L.layerGroup();
+    state.hydrants.forEach((hydrant) => {
+      const icon = L.divIcon({
+        className: "",
+        html: '<div class="hydrant-marker">H</div>',
+        iconSize: [25, 25],
+        iconAnchor: [12, 12]
+      });
+      const props = hydrant.properties;
+      const title = props.nom || props.name || props.numero || props.id || "Borne-fontaine";
+      L.marker([hydrant.lat, hydrant.lng], { icon })
+        .bindPopup(`<strong>${escapeHtml(String(title))}</strong><br>${hydrant.lat.toFixed(6)}, ${hydrant.lng.toFixed(6)}`)
+        .addTo(state.hydrantLayer);
+    });
+
+    state.hydrantLayer.addTo(map);
+    el.hydrantCount.textContent = `${state.hydrants.length} bornes affichées`;
+  }
+
+  function escapeHtml(value) {
+    return value.replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+    })[char]);
+  }
+
+  function searchAddresses(query) {
+    const terms = normalize(query).split(" ").filter(Boolean);
+    if (!terms.length) return [];
+    return state.addresses
+      .filter((a) => terms.every((term) => a.recherche.includes(term)))
+      .sort((a, b) => {
+        const first = terms[0];
+        const ap = a.recherche.startsWith(first) ? 0 : 1;
+        const bp = b.recherche.startsWith(first) ? 0 : 1;
+        return ap - bp || a.adresse.localeCompare(b.adresse, "fr");
+      })
+      .slice(0, 30);
+  }
+
+  function renderResults(items) {
+    el.results.innerHTML = "";
+    if (!el.input.value.trim()) return;
+
+    if (!items.length) {
+      el.status.textContent = "Aucune adresse trouvée";
+      return;
+    }
+
+    el.status.textContent = `${items.length} résultat${items.length > 1 ? "s" : ""}`;
+    const fragment = document.createDocumentFragment();
+
+    items.forEach((address) => {
+      const button = document.createElement("button");
+      button.className = "result-item";
+      button.innerHTML = `
+        <span class="pin">📍</span>
+        <span>
+          <strong>${escapeHtml(address.adresse)}</strong>
+          <small>${address.lat.toFixed(6)}, ${address.lng.toFixed(6)}</small>
+        </span>`;
+      button.addEventListener("click", () => selectAddress(address));
+      fragment.appendChild(button);
+    });
+    el.results.appendChild(fragment);
+  }
+
+  function selectAddress(address) {
+    state.selected = address;
+    el.input.value = address.adresse;
+    el.results.innerHTML = "";
+    el.status.textContent = "Adresse sélectionnée";
+    el.selectedPanel.classList.remove("hidden");
+    el.selectedAddress.textContent = address.adresse;
+    el.selectedCoords.textContent = `${address.lat.toFixed(6)}, ${address.lng.toFixed(6)}`;
+    el.openSelected.disabled = false;
+    el.nearestHydrant.disabled = state.hydrants.length === 0;
+
+    if (state.selectedMarker) map.removeLayer(state.selectedMarker);
+    state.selectedMarker = L.marker([address.lat, address.lng])
+      .addTo(map)
+      .bindPopup(`<strong>Intervention</strong><br>${escapeHtml(address.adresse)}`)
+      .openPopup();
+
+    map.setView([address.lat, address.lng], 17);
+  }
+
+  function navigationUrl(lat, lng, label = "") {
+    const destination = `${lat},${lng}`;
+    const isApple = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isApple) {
+      return `https://maps.apple.com/?daddr=${encodeURIComponent(destination)}&dirflg=d`;
+    }
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+  }
+
+  function startNavigation(address = state.selected) {
+    if (!address) return toast("Choisis d’abord une adresse.");
+    window.location.href = navigationUrl(address.lat, address.lng, address.adresse);
+  }
+
+  function locateUser() {
+    if (!navigator.geolocation) return toast("Localisation non prise en charge.");
+    el.locate.textContent = "Localisation…";
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        state.userPosition = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        if (state.userMarker) map.removeLayer(state.userMarker);
+        state.userMarker = L.circleMarker([state.userPosition.lat, state.userPosition.lng], {
+          radius: 9, color: "#fff", weight: 3, fillColor: "#2563eb", fillOpacity: 1
+        }).addTo(map).bindPopup("Votre position").openPopup();
+        map.setView([state.userPosition.lat, state.userPosition.lng], 16);
+        el.locate.textContent = "Ma position";
+      },
+      () => {
+        el.locate.textContent = "Ma position";
+        toast("Autorise la localisation dans Safari.");
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 10000 }
+    );
+  }
+
+  function distanceMeters(a, b) {
+    const R = 6371000;
+    const p1 = a.lat * Math.PI / 180;
+    const p2 = b.lat * Math.PI / 180;
+    const dp = (b.lat - a.lat) * Math.PI / 180;
+    const dl = (b.lng - a.lng) * Math.PI / 180;
+    const x = Math.sin(dp/2) ** 2 +
+      Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) ** 2;
+    return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+  }
+
+  function findNearestHydrant() {
+    if (!state.selected) return toast("Choisis une adresse.");
+    if (!state.hydrants.length) return toast("Aucune borne chargée.");
+
+    let nearest = null;
+    let nearestDistance = Infinity;
+    state.hydrants.forEach((hydrant) => {
+      const d = distanceMeters(state.selected, hydrant);
+      if (d < nearestDistance) {
+        nearest = hydrant;
+        nearestDistance = d;
+      }
+    });
+
+    if (!nearest) return;
+    map.fitBounds([
+      [state.selected.lat, state.selected.lng],
+      [nearest.lat, nearest.lng]
+    ], { padding: [40, 40] });
+
+    L.popup()
+      .setLatLng([nearest.lat, nearest.lng])
+      .setContent(`<strong>Borne la plus proche</strong><br>Environ ${Math.round(nearestDistance)} m`)
+      .openOn(map);
+    toast(`Borne la plus proche : environ ${Math.round(nearestDistance)} m`);
+  }
+
+  el.input.addEventListener("input", () => renderResults(searchAddresses(el.input.value)));
+  el.clear.addEventListener("click", () => {
+    el.input.value = "";
+    el.results.innerHTML = "";
+    el.status.textContent = `${state.addresses.length.toLocaleString("fr-CA")} adresses chargées`;
+    el.input.focus();
+  });
+  el.start.addEventListener("click", () => startNavigation());
+  el.openSelected.addEventListener("click", () => startNavigation());
+  el.nearestHydrant.addEventListener("click", findNearestHydrant);
+  el.locate.addEventListener("click", locateUser);
+  $("navSearch").addEventListener("click", () => {
+    document.querySelector(".search-section").scrollIntoView({ behavior: "smooth", block: "start" });
+    setTimeout(() => el.input.focus(), 500);
+  });
+  $("navRefresh").addEventListener("click", () => location.reload());
+  el.hydrantToggle.addEventListener("change", () => {
+    if (!state.hydrantLayer) return;
+    if (el.hydrantToggle.checked) state.hydrantLayer.addTo(map);
+    else map.removeLayer(state.hydrantLayer);
+  });
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    state.deferredInstall = event;
+    el.install.classList.remove("hidden");
+  });
+  el.install.addEventListener("click", async () => {
+    if (!state.deferredInstall) return;
+    state.deferredInstall.prompt();
+    await state.deferredInstall.userChoice;
+    state.deferredInstall = null;
+    el.install.classList.add("hidden");
+  });
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js"));
+  }
+
+  Promise.all([loadAddresses(), loadHydrants()]);
+})();

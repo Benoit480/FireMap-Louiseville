@@ -45,6 +45,7 @@
         <div id="map"></div>
         <button id="mapAddBtn" class="map-fab" title="Ajouter une borne">＋</button>
       </div>
+      <details class="hydrant-legend"><summary>🎨 Légende des bornes</summary><div class="legend-grid"><span><i class="dot blue"></i>≥ 1 500 gal/min</span><span><i class="dot green"></i>750–1 499</span><span><i class="dot yellow"></i>500–749</span><span><i class="dot orange"></i>250–499</span><span><i class="dot red"></i>&lt; 250</span></div><div class="availability-legend"><span><i style="--c:#39d353"></i>Disponible</span><span><i style="--c:#ffd400"></i>Restreinte</span><span><i style="--c:#ff3b30"></i>Hors service</span><span><i style="--c:#9ca3af"></i>Inconnue</span></div></details>
       <div id="interventionCard" class="intervention-card hidden">
         <div class="intervention-head">
           <div><small>INTERVENTION ACTIVE</small><strong id="selectedAddress"></strong><span id="nearestText">Calcul des ressources à proximité…</span></div>
@@ -64,7 +65,7 @@
 
     <section id="view-hydrants" class="view">
       <div class="section-title"><div><small>RÉSEAU INCENDIE</small><h2>Bornes-fontaines</h2></div><button id="addHydrantTop" class="primary small">＋ Ajouter</button></div>
-      <div class="filter-row"><input id="hydrantSearch" type="search" placeholder="Rechercher numéro, rue, statut…"><select id="statusFilter"><option value="">Tous les statuts</option><option value="active">Active</option><option value="maintenance">Entretien</option><option value="inactive">Hors service</option></select></div>
+      <div class="filter-row"><input id="hydrantSearch" type="search" placeholder="Rechercher numéro, rue, statut…"><select id="statusFilter"><option value="">Tous les statuts</option><option value="available">Disponible</option><option value="restricted">Restreinte</option><option value="out_of_service">Hors service</option><option value="unknown">Inconnue</option></select></div>
       <div id="hydrantList" class="card-list"></div>
     </section>
 
@@ -93,13 +94,13 @@
       <input type="hidden" id="hydrantId">
       <div class="form-grid">
         <label>Numéro / nom<input id="hydrantName" required placeholder="Ex. 02"></label>
-        <label>Statut<select id="hydrantStatus"><option value="active">Active</option><option value="maintenance">Entretien</option><option value="inactive">Hors service</option></select></label>
+        <label>Statut<select id="hydrantStatus"><option value="available">Disponible</option><option value="restricted">Restreinte</option><option value="out_of_service">Hors service</option><option value="unknown">Inconnue</option></select></label>
         <label class="wide">Adresse<input id="hydrantAddress" placeholder="Ex. 81 rue Sainte-Élisabeth"></label>
         <label>Latitude<input id="hydrantLat" type="number" step="any" required></label>
         <label>Longitude<input id="hydrantLng" type="number" step="any" required></label>
-        <label>Couleur<select id="hydrantColor"><option value="blue">Bleue</option><option value="red">Rouge</option><option value="yellow">Jaune</option><option value="green">Verte</option><option value="orange">Orange</option></select></label>
+        
         <label>Type / sorties<input id="outletType" placeholder="Ex. 2 × 65 mm"></label>
-        <label>Débit (L/min)<input id="flowRate" type="number" min="0" placeholder="Ex. 3800"></label>
+        <label>Débit (gal/min)<input id="flowRate" type="number" min="0" step="1" placeholder="Ex. 1000"><small class="field-help">La couleur de la borne est calculée automatiquement.</small></label>
         <label>Date d’inspection<input id="inspectionDate" type="date"></label>
         <label class="wide">Notes<textarea id="hydrantNotes" rows="3" placeholder="Informations opérationnelles"></textarea></label>
       </div>

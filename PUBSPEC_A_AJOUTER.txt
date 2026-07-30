@@ -1,8 +1,0 @@
-dependencies:
-  flutter:
-    sdk: flutter
-  url_launcher: ^6.3.2
-
-flutter:
-  assets:
-    - assets/data/louiseville_adresses.json

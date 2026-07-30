@@ -37,7 +37,7 @@
     <section id="view-map" class="view active">
       <div class="search-card compact">
         <label for="addressSearch">Adresse d’intervention</label>
-        <div class="search-row"><input id="addressSearch" type="search" autocomplete="off" placeholder="Ex. 192 Notre-Dame"><button id="clearSearch">×</button></div>
+        <div class="search-row"><input id="addressSearch" type="search" autocomplete="off" placeholder="Ex. 192 Notre-Dame ou 507 St-Laurent"><button id="voiceSearch" class="voice-btn" title="Recherche vocale" aria-label="Recherche vocale">🎤</button><button id="clearSearch">×</button></div>
         <div id="searchStatus" class="muted"></div><div id="results" class="results"></div>
       </div>
       <div class="map-card">
@@ -56,6 +56,10 @@
           <h3>3 bornes les plus proches</h3>
           <div id="nearestList" class="nearest-list"></div>
         </div>
+      </div>
+      <div class="recent-card favorites-card">
+        <div class="recent-head"><strong>⭐ Lieux favoris</strong><button id="addFavorite" class="text-btn">Ajouter l’adresse active</button></div>
+        <div id="favoritePlaces" class="recent-list"></div>
       </div>
       <div class="recent-card">
         <div class="recent-head"><strong>Interventions récentes</strong><button id="clearHistory" class="text-btn">Effacer</button></div>
@@ -76,7 +80,7 @@
 
     <section id="view-search" class="view">
       <div class="section-title"><div><small>RÉFÉRENTIEL OFFICIEL</small><h2>Recherche d’adresse</h2></div></div>
-      <div class="search-card"><label for="addressSearchFull">Adresse</label><div class="search-row"><input id="addressSearchFull" type="search" autocomplete="off" placeholder="Numéro, rue ou code postal"><button id="clearSearchFull">×</button></div><div id="searchStatusFull" class="muted"></div><div id="resultsFull" class="results"></div></div>
+      <div class="search-card"><label for="addressSearchFull">Adresse</label><div class="search-row"><input id="addressSearchFull" type="search" autocomplete="off" placeholder="Ex. 80 St-Paul, 507 Ste-Dorothée ou code postal"><button id="voiceSearchFull" class="voice-btn" title="Recherche vocale" aria-label="Recherche vocale">🎤</button><button id="clearSearchFull">×</button></div><div id="searchStatusFull" class="muted"></div><div id="resultsFull" class="results"></div></div>
     </section>
   </main>
 

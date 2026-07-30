@@ -1,78 +1,43 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-import {
-  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot,
-  writeBatch, serverTimestamp, enableIndexedDbPersistence
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js";
-
-const configured = Boolean(
-  firebaseConfig.apiKey &&
-  !firebaseConfig.apiKey.startsWith("COLLEZ_") &&
-  firebaseConfig.projectId &&
-  !firebaseConfig.projectId.startsWith("COLLEZ_")
-);
-
-function cleanPoint(point) {
-  // Les photos en base64 restent locales pour éviter la limite de 1 Mio par document Firestore.
-  const { photo, ...data } = point;
-  return {
-    ...data,
-    id: String(point.id),
-    lat: Number(point.lat),
-    lng: Number(point.lng),
-    updatedAt: serverTimestamp()
-  };
-}
-
-if (!configured) {
-  window.fireMapCloud = { configured: false };
-  window.dispatchEvent(new Event("firemap-cloud-ready"));
-} else {
+(async () => {
+  const cfg = window.firebaseConfig || {};
+  if (!cfg.apiKey || !cfg.projectId) {
+    window.fireMapCloud = { configured: false };
+    window.dispatchEvent(new Event("firemap-cloud-ready"));
+    return;
+  }
   try {
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    try { await enableIndexedDbPersistence(db); } catch (_) {}
-    await signInAnonymously(auth);
-    const points = collection(db, "bornes");
-
+    const [{ initializeApp }, authMod, fs] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js"),
+      import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js")
+    ]);
+    const app = initializeApp(cfg);
+    const auth = authMod.getAuth(app);
+    const db = fs.getFirestore(app);
+    try { await fs.enableIndexedDbPersistence(db); } catch (_) {}
+    await authMod.signInAnonymously(auth);
+    const ref = fs.collection(db, "bornes");
+    const clean = p => {
+      const data = { ...p };
+      delete data.photo;
+      return { ...data, id: String(p.id), lat: Number(p.lat), lng: Number(p.lng), updatedAt: fs.serverTimestamp() };
+    };
     window.fireMapCloud = {
       configured: true,
-      subscribe(onData, onError) {
-        return onSnapshot(points, snap => {
-          const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          onData(data);
-        }, onError);
-      },
-      savePoint(point) {
-        return setDoc(doc(db, "bornes", String(point.id)), cleanPoint(point), { merge: true });
-      },
+      subscribe(ok, fail) { return fs.onSnapshot(ref, s => ok(s.docs.map(d => ({ id: d.id, ...d.data() }))), fail); },
+      savePoint(p) { return fs.setDoc(fs.doc(db, "bornes", String(p.id)), clean(p), { merge: true }); },
+      deletePoint(id) { return fs.deleteDoc(fs.doc(db, "bornes", String(id))); },
       async saveMany(items) {
-        const chunks = [];
-        for (let i = 0; i < items.length; i += 400) chunks.push(items.slice(i, i + 400));
-        for (const chunk of chunks) {
-          const batch = writeBatch(db);
-          chunk.forEach(p => batch.set(doc(db, "bornes", String(p.id)), cleanPoint(p), { merge: true }));
-          await batch.commit();
-        }
-      },
-      deletePoint(id) {
-        return deleteDoc(doc(db, "bornes", String(id)));
-      },
-      async deleteMany(ids) {
-        const chunks = [];
-        for (let i = 0; i < ids.length; i += 400) chunks.push(ids.slice(i, i + 400));
-        for (const chunk of chunks) {
-          const batch = writeBatch(db);
-          chunk.forEach(id => batch.delete(doc(db, "bornes", String(id))));
+        for (let i = 0; i < items.length; i += 400) {
+          const batch = fs.writeBatch(db);
+          items.slice(i, i + 400).forEach(p => batch.set(fs.doc(db, "bornes", String(p.id)), clean(p), { merge: true }));
           await batch.commit();
         }
       }
     };
   } catch (error) {
-    console.error("Firebase FireMap:", error);
+    console.error(error);
     window.fireMapCloud = { configured: false, error };
   }
   window.dispatchEvent(new Event("firemap-cloud-ready"));
-}
+})();

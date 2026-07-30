@@ -1,6 +1,4 @@
-// FireMap Louiseville — configuration Firebase Web
-// Cette configuration publique relie l'application GitHub Pages au projet Firebase.
-export const firebaseConfig = {
+window.firebaseConfig = {
   apiKey: "AIzaSyCGY3TSOzEyjIechRsSszV5vLH5n2pEJI0",
   authDomain: "firemap-louiseville.firebaseapp.com",
   projectId: "firemap-louiseville",

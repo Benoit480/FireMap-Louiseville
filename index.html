@@ -3,92 +3,101 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#b91c1c">
+  <meta name="theme-color" content="#991b1b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Pompiers">
-  <title>Pompiers Louiseville</title>
+  <meta name="apple-mobile-web-app-title" content="FireMap">
+  <title>FireMap Louiseville</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="preconnect" href="https://unpkg.com">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="topbar">
-    <div>
-      <div class="eyebrow">SERVICE INCENDIE</div>
-      <h1>Louiseville</h1>
-    </div>
-    <button id="installBtn" class="icon-btn hidden" aria-label="Installer l’application">＋</button>
+    <button id="menuBtn" class="header-btn" aria-label="Ouvrir le menu">☰</button>
+    <div><div class="eyebrow">SERVICE INCENDIE</div><h1>FireMap Louiseville</h1></div>
+    <button id="locateBtn" class="header-btn" aria-label="Ma position">⌖</button>
   </header>
 
+  <aside id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawer-head"><div><div class="eyebrow">SERVICE INCENDIE</div><h2>Louiseville</h2></div><button id="closeDrawer">×</button></div>
+    <button data-view="map" class="drawer-link active">🗺️ Carte opérationnelle</button>
+    <button data-view="hydrants" class="drawer-link">🚰 Bornes-fontaines</button>
+    <button id="drawerAdd" class="drawer-link">➕ Ajouter une borne</button>
+    <button data-view="inspections" class="drawer-link">✅ Inspections</button>
+    <button data-view="search" class="drawer-link">🔎 Recherche d’adresse</button>
+    <div class="drawer-separator"></div>
+    <div class="sync-box"><span id="syncDot"></span><div><strong id="syncTitle">Connexion…</strong><small id="syncText">Vérification Firebase</small></div></div>
+    <button id="installBtn" class="drawer-link hidden">📲 Installer l’application</button>
+  </aside>
+  <div id="backdrop" class="backdrop hidden"></div>
+
   <main>
-    <section class="hero-card">
-      <div>
-        <span class="status-dot"></span>
-        <strong>Application opérationnelle</strong>
-        <p>Adresses officielles, GPS et bornes-fontaines.</p>
+    <section id="view-map" class="view active">
+      <div class="search-card compact">
+        <label for="addressSearch">Adresse d’intervention</label>
+        <div class="search-row"><input id="addressSearch" type="search" autocomplete="off" placeholder="Ex. 192 Notre-Dame"><button id="clearSearch">×</button></div>
+        <div id="searchStatus" class="muted"></div><div id="results" class="results"></div>
       </div>
-      <button id="locateBtn" class="secondary-btn">Ma position</button>
+      <div class="map-card">
+        <div class="map-toolbar"><div><strong>Carte opérationnelle</strong><span id="hydrantCount">Chargement…</span></div><label class="switch"><input id="hydrantToggle" type="checkbox" checked><span></span> Bornes</label></div>
+        <div id="map"></div>
+        <button id="mapAddBtn" class="map-fab" title="Ajouter une borne">＋</button>
+      </div>
+      <div id="interventionCard" class="intervention-card hidden">
+        <div><small>INTERVENTION</small><strong id="selectedAddress"></strong><span id="nearestText">Choisissez une action</span></div>
+        <div class="action-row"><button id="nearestBtn" class="secondary">🚰 Borne proche</button><button id="gpsBtn" class="primary">➤ GPS</button></div>
+      </div>
     </section>
 
-    <section class="search-section">
-      <label for="addressSearch">Adresse d’intervention</label>
-      <div class="search-row">
-        <input id="addressSearch" type="search" autocomplete="off"
-               placeholder="Ex. 192 Notre-Dame">
-        <button id="clearSearch" class="clear-btn" aria-label="Effacer">×</button>
-      </div>
-      <div id="searchStatus" class="search-status"></div>
-      <div id="results" class="results"></div>
+    <section id="view-hydrants" class="view">
+      <div class="section-title"><div><small>RÉSEAU INCENDIE</small><h2>Bornes-fontaines</h2></div><button id="addHydrantTop" class="primary small">＋ Ajouter</button></div>
+      <div class="filter-row"><input id="hydrantSearch" type="search" placeholder="Rechercher numéro, rue, statut…"><select id="statusFilter"><option value="">Tous les statuts</option><option value="active">Active</option><option value="maintenance">Entretien</option><option value="inactive">Hors service</option></select></div>
+      <div id="hydrantList" class="card-list"></div>
     </section>
 
-    <section class="map-card">
-      <div class="map-toolbar">
-        <div>
-          <strong>Carte opérationnelle</strong>
-          <span id="hydrantCount">Chargement des bornes…</span>
-        </div>
-        <label class="toggle">
-          <input id="hydrantToggle" type="checkbox" checked>
-          <span>Bornes</span>
-        </label>
-      </div>
-      <div id="map"></div>
+    <section id="view-inspections" class="view">
+      <div class="section-title"><div><small>SUIVI</small><h2>Inspections</h2></div></div>
+      <div id="inspectionStats" class="stats-grid"></div><div id="inspectionList" class="card-list"></div>
     </section>
 
-    <section class="quick-grid">
-      <button class="quick-card" id="openSelectedBtn" disabled>
-        <span class="quick-icon">➤</span>
-        <strong>Départ GPS</strong>
-        <small>Vers l’adresse choisie</small>
-      </button>
-      <button class="quick-card" id="nearestHydrantBtn" disabled>
-        <span class="quick-icon">🚰</span>
-        <strong>Borne la plus proche</strong>
-        <small>Calcul automatique</small>
-      </button>
-    </section>
-
-    <section id="selectedPanel" class="selected-panel hidden">
-      <div>
-        <span class="panel-label">INTERVENTION</span>
-        <h2 id="selectedAddress"></h2>
-        <p id="selectedCoords"></p>
-      </div>
-      <button id="startBtn" class="primary-btn">DÉPART</button>
+    <section id="view-search" class="view">
+      <div class="section-title"><div><small>RÉFÉRENTIEL OFFICIEL</small><h2>Recherche d’adresse</h2></div></div>
+      <div class="search-card"><label for="addressSearchFull">Adresse</label><div class="search-row"><input id="addressSearchFull" type="search" autocomplete="off" placeholder="Numéro, rue ou code postal"><button id="clearSearchFull">×</button></div><div id="searchStatusFull" class="muted"></div><div id="resultsFull" class="results"></div></div>
     </section>
   </main>
 
   <nav class="bottom-nav">
-    <button class="active">🗺️<span>Carte</span></button>
-    <button id="navSearch">🔎<span>Recherche</span></button>
-    <button id="navRefresh">↻<span>Actualiser</span></button>
+    <button data-view="map" class="active">🗺️<span>Carte</span></button>
+    <button data-view="hydrants">🚰<span>Bornes</span></button>
+    <button id="bottomAdd" class="add-main">＋<span>Ajouter</span></button>
+    <button data-view="inspections">✅<span>Inspections</span></button>
+    <button id="bottomMore">☰<span>Plus</span></button>
   </nav>
 
-  <div id="toast" class="toast hidden"></div>
+  <dialog id="hydrantDialog">
+    <form id="hydrantForm" method="dialog">
+      <div class="modal-head"><div><small id="modalKicker">BORNE-FONTAINE</small><h2 id="modalTitle">Ajouter une borne</h2></div><button type="button" id="closeModal">×</button></div>
+      <input type="hidden" id="hydrantId">
+      <div class="form-grid">
+        <label>Numéro / nom<input id="hydrantName" required placeholder="Ex. 02"></label>
+        <label>Statut<select id="hydrantStatus"><option value="active">Active</option><option value="maintenance">Entretien</option><option value="inactive">Hors service</option></select></label>
+        <label class="wide">Adresse<input id="hydrantAddress" placeholder="Ex. 81 rue Sainte-Élisabeth"></label>
+        <label>Latitude<input id="hydrantLat" type="number" step="any" required></label>
+        <label>Longitude<input id="hydrantLng" type="number" step="any" required></label>
+        <label>Couleur<select id="hydrantColor"><option value="blue">Bleue</option><option value="red">Rouge</option><option value="yellow">Jaune</option><option value="green">Verte</option><option value="orange">Orange</option></select></label>
+        <label>Type / sorties<input id="outletType" placeholder="Ex. 2 × 65 mm"></label>
+        <label>Débit (L/min)<input id="flowRate" type="number" min="0" placeholder="Ex. 3800"></label>
+        <label>Date d’inspection<input id="inspectionDate" type="date"></label>
+        <label class="wide">Notes<textarea id="hydrantNotes" rows="3" placeholder="Informations opérationnelles"></textarea></label>
+      </div>
+      <p id="formHint" class="muted">Astuce : utilisez votre position ou touchez la carte avant d’ouvrir ce formulaire.</p>
+      <div class="modal-actions"><button type="button" id="deleteHydrant" class="danger hidden">Supprimer</button><span></span><button type="button" id="cancelModal" class="secondary">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+    </form>
+  </dialog>
 
+  <div id="toast" class="toast hidden"></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="firebase-config.js"></script>
   <script src="firebase-sync.js"></script>

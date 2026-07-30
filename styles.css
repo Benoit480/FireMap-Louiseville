@@ -13,14 +13,9 @@
 .install-banner{position:fixed;z-index:2500;left:10px;right:10px;bottom:calc(82px + env(safe-area-inset-bottom));background:#141b25;border:1px solid #414c5b;border-radius:13px;padding:10px;display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;font-size:12px}
 .install-banner button{border:0;border-radius:8px;padding:8px;background:#e21d25;color:white}
 
-/* FireMap — borne colorée par débit, anneau extérieur par statut */
-.hydrant-marker{width:46px;height:46px;border-radius:50%;padding:4px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 13px #000b}
-.hydrant-marker.status-active{background:#66d126}
-.hydrant-marker.status-inspection{background:#ff9800}
-.hydrant-marker.status-out{background:#f0242b}
-.hydrant-black{width:38px;height:38px;border-radius:50%;background:#080b10;display:flex;align-items:center;justify-content:center;border:1px solid #313844}
-.hydrant-shape{display:block;width:29px;height:29px;-webkit-mask:url('./hydrant-mask.png') center/contain no-repeat;mask:url('./hydrant-mask.png') center/contain no-repeat;filter:drop-shadow(0 1px 1px #000)}
-.hydrant-shape.flow-red{background:#ef2b32}
-.hydrant-shape.flow-orange{background:#ff9800}
-.hydrant-shape.flow-green{background:#55c832}
-.hydrant-shape.flow-blue{background:#2586ef}
+/* Marqueurs de bornes : couleur de la borne = débit, anneau extérieur = statut */
+.hydrant-marker{--hydrant:#e5252d;--status:#2dbf55;width:46px;height:46px;border-radius:50%;background:#070a0e;border:5px solid var(--status);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 11px #000b,0 0 0 2px #fff8;position:relative}
+.hydrant-shape{display:block;width:28px;height:34px;background:var(--hydrant);-webkit-mask:url('./hydrant-mask.png') center/contain no-repeat;mask:url('./hydrant-mask.png') center/contain no-repeat;filter:drop-shadow(0 1px 1px #000)}
+.flow-red{--hydrant:#e5252d}.flow-orange{--hydrant:#ff9418}.flow-green{--hydrant:#55c928}.flow-blue{--hydrant:#2088ff}
+.status-active{--status:#43c93f}.status-inspection{--status:#ff9814}.status-out{--status:#ef2732}
+.detail-marker{width:62px;height:62px;flex:0 0 62px;border-width:6px}.detail-marker .hydrant-shape{width:39px;height:47px}

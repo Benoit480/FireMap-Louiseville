@@ -24,7 +24,8 @@
     <div class="drawer-head"><div><div class="eyebrow">SERVICE INCENDIE</div><h2>Louiseville</h2></div><button id="closeDrawer">×</button></div>
     <button data-view="map" class="drawer-link active">🗺️ Carte opérationnelle</button>
     <button data-view="hydrants" class="drawer-link">🚰 Bornes-fontaines</button>
-    <button id="drawerAdd" class="drawer-link">➕ Ajouter une borne</button>
+    <button id="drawerAdd" class="drawer-link">➕ Ajouter</button>
+    <button data-view="preplans" class="drawer-link">🏢 Préplans / bâtiments</button>
     <button data-view="inspections" class="drawer-link">✅ Inspections</button>
     <button data-view="search" class="drawer-link">🔎 Recherche d’adresse</button>
     <div class="drawer-separator"></div>
@@ -41,7 +42,7 @@
         <div id="searchStatus" class="muted"></div><div id="results" class="results"></div>
       </div>
       <div class="map-card">
-        <div class="map-toolbar"><div><strong>Carte opérationnelle</strong><span id="hydrantCount">Chargement…</span></div><label class="switch"><input id="hydrantToggle" type="checkbox" checked><span></span> Bornes</label></div>
+        <div class="map-toolbar"><div><strong>Carte opérationnelle</strong><span id="hydrantCount">Chargement…</span></div><div class="layer-switches"><label class="switch"><input id="hydrantToggle" type="checkbox" checked><span></span> Bornes</label><label class="switch"><input id="buildingToggle" type="checkbox" checked><span></span> Bâtiments</label></div></div>
         <div id="map"></div>
         <button id="mapAddBtn" class="map-fab" title="Ajouter une borne">＋</button>
       </div>
@@ -73,6 +74,13 @@
       <div id="hydrantList" class="card-list"></div>
     </section>
 
+
+    <section id="view-preplans" class="view">
+      <div class="section-title"><div><small>PRÉVENTION ET INTERVENTION</small><h2>Préplans et bâtiments à risque</h2></div><button id="addBuildingTop" class="primary small">＋ Ajouter</button></div>
+      <div class="filter-row"><input id="buildingSearch" type="search" placeholder="Rechercher nom, adresse, risque…"><select id="riskFilter"><option value="">Tous les risques</option><option value="low">Faible</option><option value="medium">Moyen</option><option value="high">Élevé</option><option value="very_high">Très élevé</option></select></div>
+      <div id="buildingList" class="card-list"></div>
+    </section>
+
     <section id="view-inspections" class="view">
       <div class="section-title"><div><small>SUIVI</small><h2>Inspections</h2></div></div>
       <div id="inspectionStats" class="stats-grid"></div><div id="inspectionList" class="card-list"></div>
@@ -88,7 +96,7 @@
     <button data-view="map" class="active">🗺️<span>Carte</span></button>
     <button data-view="hydrants">🚰<span>Bornes</span></button>
     <button id="bottomAdd" class="add-main">＋<span>Ajouter</span></button>
-    <button data-view="inspections">✅<span>Inspections</span></button>
+    <button data-view="preplans">🏢<span>Préplans</span></button>
     <button id="bottomMore">☰<span>Plus</span></button>
   </nav>
 
@@ -113,10 +121,51 @@
     </form>
   </dialog>
 
+
+  <dialog id="addChoiceDialog" class="choice-dialog">
+    <div class="modal-head"><div><small>AJOUTER SUR LA CARTE</small><h2>Que voulez-vous ajouter?</h2></div><button type="button" id="closeChoice">×</button></div>
+    <div class="choice-grid"><button id="chooseHydrant" class="choice-card"><span>🚰</span><strong>Une borne-fontaine</strong><small>Conserve le formulaire actuel</small></button><button id="chooseBuilding" class="choice-card"><span>🏢</span><strong>Un bâtiment à risque</strong><small>Créer un préplan opérationnel</small></button></div>
+  </dialog>
+
+  <dialog id="buildingDialog" class="building-dialog">
+    <form id="buildingForm" method="dialog">
+      <div class="modal-head"><div><small>BÂTIMENT À RISQUE</small><h2 id="buildingModalTitle">Ajouter un préplan</h2></div><button type="button" id="closeBuildingModal">×</button></div>
+      <input type="hidden" id="buildingId">
+      <div class="form-section"><h3>Informations générales</h3><div class="form-grid">
+        <label>Nom du bâtiment<input id="buildingName" required placeholder="Ex. École secondaire"></label>
+        <label>Catégorie<select id="buildingCategory"><option value="other">Autre</option><option value="school">École</option><option value="care">CHSLD / résidence</option><option value="industry">Industrie</option><option value="commercial">Commerce</option><option value="gas_station">Station-service</option><option value="municipal">Municipal</option><option value="hazmat">Matières dangereuses</option></select></label>
+        <label class="wide">Adresse<input id="buildingAddress" required placeholder="Commencez à écrire une adresse"></label>
+        <label>Latitude<input id="buildingLat" type="number" step="any" required></label><label>Longitude<input id="buildingLng" type="number" step="any" required></label>
+        <label>Niveau de risque<select id="buildingRisk"><option value="low">Faible</option><option value="medium">Moyen</option><option value="high" selected>Élevé</option><option value="very_high">Très élevé</option></select></label>
+        <label>Nombre d’étages<input id="buildingFloors" type="number" min="0" value="1"></label>
+        <label>Sous-sol<select id="buildingBasement"><option value="no">Non</option><option value="yes">Oui</option><option value="partial">Partiel</option><option value="unknown">Inconnu</option></select></label>
+      </div></div>
+      <div class="form-section"><h3>Préplan et opérations</h3><div class="form-grid">
+        <label class="wide">Risques particuliers<textarea id="buildingRisks" rows="3" placeholder="Construction, occupants, toiture, stockage…"></textarea></label>
+        <label class="wide">FDC / prise pompier<textarea id="buildingFdc" rows="2" placeholder="Emplacement, raccord, pression…"></textarea></label>
+        <label class="wide">Entrée et coupure électrique<textarea id="buildingElectrical" rows="2"></textarea></label>
+        <label class="wide">Gaz / propane<textarea id="buildingGas" rows="2"></textarea></label>
+        <label class="wide">Matières dangereuses<textarea id="buildingHazmat" rows="3" placeholder="Produits, quantité, emplacement, FDS…"></textarea></label>
+        <label class="wide">Accès pompier / boîte Knox / codes<textarea id="buildingAccess" rows="2"></textarea></label>
+        <label>Point de rassemblement<input id="buildingAssembly"></label><label>Côté d’attaque conseillé<input id="buildingAttackSide"></label>
+      </div></div>
+      <div class="form-section"><h3>Responsable</h3><div class="form-grid"><label>Nom<input id="buildingContactName"></label><label>Téléphone<input id="buildingContactPhone" type="tel"></label></div></div>
+      <div class="form-section"><h3>Plans et photos</h3><div class="form-grid">
+        <label class="wide">Lien du plan (PDF ou image)<input id="buildingPlanUrl" type="url" placeholder="https://..."><small class="field-help">Utilisez un lien accessible aux utilisateurs autorisés.</small></label>
+        <label class="wide">Liens des photos<textarea id="buildingPhotoUrls" rows="3" placeholder="Un lien par ligne"></textarea></label>
+        <label class="wide">Notes opérationnelles<textarea id="buildingNotes" rows="3"></textarea></label>
+      </div></div>
+      <div class="modal-actions"><button type="button" id="deleteBuilding" class="danger hidden">Supprimer</button><span></span><button type="button" id="cancelBuilding" class="secondary">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="preplanDialog" class="preplan-dialog"><div id="preplanContent"></div></dialog>
+
   <div id="toast" class="toast hidden"></div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="firebase-config.js"></script>
   <script src="firebase-sync.js"></script>
   <script src="app.js"></script>
+  <script src="preplans.js"></script>
 </body>
 </html>

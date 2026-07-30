@@ -27,6 +27,9 @@
       subscribe(ok, fail) { return fs.onSnapshot(ref, s => ok(s.docs.map(d => ({ id: d.id, ...d.data() }))), fail); },
       savePoint(p) { return fs.setDoc(fs.doc(db, "bornes", String(p.id)), clean(p), { merge: true }); },
       deletePoint(id) { return fs.deleteDoc(fs.doc(db, "bornes", String(id))); },
+      subscribeBuildings(ok, fail) { return fs.onSnapshot(fs.collection(db, "batiments"), s => ok(s.docs.map(d => ({ id: d.id, ...d.data() }))), fail); },
+      saveBuilding(p) { const data={...p,id:String(p.id),lat:Number(p.lat),lng:Number(p.lng),updatedAt:fs.serverTimestamp()}; return fs.setDoc(fs.doc(db,"batiments",String(p.id)),data,{merge:true}); },
+      deleteBuilding(id) { return fs.deleteDoc(fs.doc(db,"batiments",String(id))); },
       async saveMany(items) {
         for (let i = 0; i < items.length; i += 400) {
           const batch = fs.writeBatch(db);

@@ -45,7 +45,7 @@
         <div id="map"></div>
         <button id="mapAddBtn" class="map-fab" title="Ajouter une borne">＋</button>
       </div>
-      <details class="hydrant-legend"><summary>🎨 Légende des bornes</summary><div class="legend-grid"><span><i class="dot blue"></i>≥ 1 500 gal/min</span><span><i class="dot green"></i>750–1 499</span><span><i class="dot yellow"></i>500–749</span><span><i class="dot orange"></i>250–499</span><span><i class="dot red"></i>&lt; 250</span></div><div class="availability-legend"><span><i style="--c:#39d353"></i>Disponible</span><span><i style="--c:#ffd400"></i>Restreinte</span><span><i style="--c:#ff3b30"></i>Hors service</span><span><i style="--c:#9ca3af"></i>Inconnue</span></div></details>
+      <details class="hydrant-legend" open><summary>🎨 Légende des bornes</summary><h3>COULEUR DE LA BORNE <small>= DÉBIT (GPM)</small></h3><div class="legend-grid"><span><i class="dot red"></i><b>Rouge</b> &lt; 500 GPM</span><span><i class="dot orange"></i><b>Orange</b> 500 à 999 GPM</span><span><i class="dot green"></i><b>Vert</b> 1 000 à 1 499 GPM</span><span><i class="dot blue"></i><b>Bleu</b> 1 500 GPM et plus</span></div><h3>ANNEAU EXTÉRIEUR <small>= DISPONIBILITÉ</small></h3><div class="availability-legend"><span><i style="--c:#39d353"></i>Disponible</span><span><i style="--c:#ff8a00"></i>À inspecter</span><span><i style="--c:#ff3b30"></i>Hors service</span></div></details>
       <div id="interventionCard" class="intervention-card hidden">
         <div class="intervention-head">
           <div><small>INTERVENTION ACTIVE</small><strong id="selectedAddress"></strong><span id="nearestText">Calcul des ressources à proximité…</span></div>
@@ -65,7 +65,7 @@
 
     <section id="view-hydrants" class="view">
       <div class="section-title"><div><small>RÉSEAU INCENDIE</small><h2>Bornes-fontaines</h2></div><button id="addHydrantTop" class="primary small">＋ Ajouter</button></div>
-      <div class="filter-row"><input id="hydrantSearch" type="search" placeholder="Rechercher numéro, rue, statut…"><select id="statusFilter"><option value="">Tous les statuts</option><option value="available">Disponible</option><option value="restricted">Restreinte</option><option value="out_of_service">Hors service</option><option value="unknown">Inconnue</option></select></div>
+      <div class="filter-row"><input id="hydrantSearch" type="search" placeholder="Rechercher numéro, rue, statut…"><select id="statusFilter"><option value="">Tous les statuts</option><option value="available">Disponible</option><option value="restricted">À inspecter</option><option value="out_of_service">Hors service</option><option value="unknown">Inconnue</option></select></div>
       <div id="hydrantList" class="card-list"></div>
     </section>
 
@@ -94,12 +94,12 @@
       <input type="hidden" id="hydrantId">
       <div class="form-grid">
         <label>Numéro / nom<input id="hydrantName" required placeholder="Ex. 02"></label>
-        <label>Statut<select id="hydrantStatus"><option value="available">Disponible</option><option value="restricted">Restreinte</option><option value="out_of_service">Hors service</option><option value="unknown">Inconnue</option></select></label>
+        <label>Statut<select id="hydrantStatus"><option value="available">Disponible</option><option value="restricted">À inspecter</option><option value="out_of_service">Hors service</option><option value="unknown">Inconnue</option></select></label>
         <label class="wide">Adresse<input id="hydrantAddress" placeholder="Ex. 81 rue Sainte-Élisabeth"></label>
         <label>Latitude<input id="hydrantLat" type="number" step="any" required></label>
         <label>Longitude<input id="hydrantLng" type="number" step="any" required></label>
         
-        <label>Type / sorties<input id="outletType" placeholder="Ex. 2 × 65 mm"></label>
+        <label>Type de sorties<select id="outletType"><option value="">Choisir…</option><option value="1 × 4 po + 2 × 2,5 po">1 × 4 po + 2 × 2,5 po</option><option value="2 × 2,5 po">2 × 2,5 po</option></select></label>
         <label>Débit (gal/min)<input id="flowRate" type="number" min="0" step="1" placeholder="Ex. 1000"><small class="field-help">La couleur de la borne est calculée automatiquement.</small></label>
         <label>Date d’inspection<input id="inspectionDate" type="date"></label>
         <label class="wide">Notes<textarea id="hydrantNotes" rows="3" placeholder="Informations opérationnelles"></textarea></label>

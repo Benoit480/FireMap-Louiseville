@@ -7,6 +7,15 @@ service cloud.firestore {
     match /batiments/{batimentId} {
       allow read, create, update, delete: if request.auth != null;
     }
+    match /prevention/{preventionId} {
+      allow read, create, update, delete: if request.auth != null;
+    }
+    match /vehicules/{vehicleId} {
+      allow read, create, update, delete: if request.auth != null;
+    }
+    match /configuration/{configId} {
+      allow read, create, update, delete: if request.auth != null;
+    }
     match /{document=**} {
       allow read, write: if false;
     }

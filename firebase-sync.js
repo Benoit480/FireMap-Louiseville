@@ -6,14 +6,16 @@
     return;
   }
   try {
-    const [{ initializeApp }, authMod, fs] = await Promise.all([
+    const [{ initializeApp }, authMod, fs, storageMod] = await Promise.all([
       import("https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js"),
       import("https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js"),
-      import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js")
+      import("https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js")
     ]);
     const app = initializeApp(cfg);
     const auth = authMod.getAuth(app);
     const db = fs.getFirestore(app);
+    const storage = storageMod.getStorage(app);
     try { await fs.enableIndexedDbPersistence(db); } catch (_) {}
     await authMod.signInAnonymously(auth);
     const ref = fs.collection(db, "bornes");
@@ -30,6 +32,24 @@
       subscribeBuildings(ok, fail) { return fs.onSnapshot(fs.collection(db, "batiments"), s => ok(s.docs.map(d => ({ id: d.id, ...d.data() }))), fail); },
       saveBuilding(p) { const data={...p,id:String(p.id),lat:Number(p.lat),lng:Number(p.lng),updatedAt:fs.serverTimestamp()}; return fs.setDoc(fs.doc(db,"batiments",String(p.id)),data,{merge:true}); },
       deleteBuilding(id) { return fs.deleteDoc(fs.doc(db,"batiments",String(id))); },
+      subscribePrevention(ok, fail) { return fs.onSnapshot(fs.collection(db, "prevention"), s => ok(s.docs.map(d => ({ id: d.id, ...d.data() }))), fail); },
+      savePrevention(p) { const data={...p,id:String(p.id),buildingId:String(p.buildingId||p.id),updatedAt:fs.serverTimestamp()}; return fs.setDoc(fs.doc(db,"prevention",String(p.id)),data,{merge:true}); },
+      deletePrevention(id) { return fs.deleteDoc(fs.doc(db,"prevention",String(id))); },
+      async uploadPreventionPhoto(buildingId, category, file) {
+        const safeName = String(file.name || "photo.jpg").replace(/[^a-zA-Z0-9._-]+/g, "-");
+        const photoId = (crypto.randomUUID ? crypto.randomUUID() : Date.now()+"-"+Math.random().toString(16).slice(2));
+        const path = `prevention/${String(buildingId)}/${String(category)}/${photoId}-${safeName}`;
+        const objectRef = storageMod.ref(storage, path);
+        await storageMod.uploadBytes(objectRef, file, { contentType: file.type || "image/jpeg", cacheControl: "public,max-age=3600" });
+        const url = await storageMod.getDownloadURL(objectRef);
+        return { url, path, name: file.name || "Photo", type: file.type || "image/jpeg", size: Number(file.size || 0), createdAt: new Date().toISOString() };
+      },
+      deletePreventionPhoto(path) { return storageMod.deleteObject(storageMod.ref(storage, String(path))); },
+      subscribeVehicles(ok, fail) { return fs.onSnapshot(fs.collection(db, "vehicules"), s => ok(s.docs.map(d => ({ id: d.id, ...d.data() }))), fail); },
+      saveVehicle(v) { const data={...v,id:String(v.id),lat:Number(v.lat),lng:Number(v.lng),updatedAt:fs.serverTimestamp()}; return fs.setDoc(fs.doc(db,"vehicules",String(v.id)),data,{merge:true}); },
+      deleteVehicle(id) { return fs.deleteDoc(fs.doc(db,"vehicules",String(id))); },
+      subscribeStation(ok, fail) { return fs.onSnapshot(fs.doc(db,"configuration","caserne"), d => ok(d.exists()?{id:d.id,...d.data()}:null), fail); },
+      saveStation(v) { const data={...v,lat:Number(v.lat),lng:Number(v.lng),updatedAt:fs.serverTimestamp()}; return fs.setDoc(fs.doc(db,"configuration","caserne"),data,{merge:true}); },
       async saveMany(items) {
         for (let i = 0; i < items.length; i += 400) {
           const batch = fs.writeBatch(db);

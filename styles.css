@@ -98,3 +98,191 @@ dialog form{background:#0b1017!important}
 .dispatch-preview strong{color:#4ade80}
 .dispatch-preview span{display:block;color:#cbd5e1}
 @media(max-width:640px){.sms-import-actions{display:grid;grid-template-columns:1fr 1fr}.sms-import-actions button{min-width:0}.assistant-address-row{grid-template-columns:1fr}.assistant-address-row button{width:100%}}
+\n\n/* V20 — Caserne et véhicules */\n.station-card,.vehicle-toolbar{background:#0b1017;border:1px solid #263244;border-radius:18px;padding:16px;margin-bottom:14px}.station-card-head{display:flex;align-items:center;gap:14px}.station-icon{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-size:34px;background:#4a0d10;border:1px solid #ef4444}.station-card h3{margin:3px 0}.station-card p,.station-card small,.vehicle-toolbar span{color:#94a3b8}.station-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.vehicle-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.vehicle-toolbar strong,.vehicle-toolbar span{display:block}.vehicle-list{display:grid;gap:10px}.vehicle-card{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:12px;background:#0b1017;border:1px solid #263244;border-radius:16px;padding:13px}.vehicle-card.sharing{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.15)}.vehicle-symbol{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:28px;background:#111827;border:2px solid var(--vehicle-status,#64748b)}.vehicle-main h3{margin:0 0 4px}.vehicle-main p{margin:2px 0;color:#94a3b8;font-size:.8rem}.vehicle-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.vehicle-status{display:inline-flex;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--vehicle-status) 18%,transparent);color:var(--vehicle-status);font-size:.72rem;font-weight:900}.vehicle-marker,.station-marker{position:relative;display:grid;place-items:center}.vehicle-marker .vehicle-marker-body{width:39px;height:39px;border-radius:12px;background:#0b1017;border:3px solid var(--status);display:grid;place-items:center;font-size:23px;box-shadow:0 4px 14px rgba(0,0,0,.45)}.vehicle-marker .vehicle-marker-label{position:absolute;top:35px;background:#05070b;color:#fff;border:1px solid #334155;border-radius:7px;padding:2px 5px;font-size:9px;font-weight:900;white-space:nowrap}.vehicle-marker.live .vehicle-marker-body:after{content:"";position:absolute;width:48px;height:48px;border:2px solid #3b82f6;border-radius:16px;animation:vehiclePulse 1.6s infinite}.station-marker-body{width:46px;height:46px;border-radius:14px;background:#4a0d10;border:3px solid #ef4444;display:grid;place-items:center;font-size:28px;box-shadow:0 5px 17px rgba(0,0,0,.5)}.station-marker-label{position:absolute;top:43px;background:#05070b;color:white;border:1px solid #ef4444;border-radius:7px;padding:2px 6px;font-size:9px;font-weight:900;white-space:nowrap}@keyframes vehiclePulse{0%{transform:scale(.8);opacity:.9}100%{transform:scale(1.25);opacity:0}}.vehicle-dialog{width:min(650px,96vw)}\n@media(max-width:650px){.vehicle-card{grid-template-columns:48px 1fr}.vehicle-actions{grid-column:1/-1;justify-content:stretch}.vehicle-actions button{flex:1}.vehicle-toolbar{align-items:flex-start;flex-direction:column}.station-actions button{flex:1}}\n
+/* V20.0.2 — Cartes du bas entièrement sombres */
+.recent-card,
+.favorites-card {
+  background:#0b1017 !important;
+  border-color:#263244 !important;
+  color:#f8fafc !important;
+  box-shadow:0 12px 30px rgba(0,0,0,.38) !important;
+}
+
+.recent-card .recent-head strong,
+.favorites-card .recent-head strong {
+  color:#f8fafc !important;
+}
+
+.recent-card .recent-item,
+.favorites-card .recent-item,
+.recent-card .favorite-item > button:first-child,
+.favorites-card .favorite-item > button:first-child {
+  background:#080d14 !important;
+  border:1px solid #263244 !important;
+  color:#f8fafc !important;
+}
+
+.recent-card .recent-item strong,
+.favorites-card .recent-item strong,
+.recent-card .favorite-item strong,
+.favorites-card .favorite-item strong {
+  color:#3b82f6 !important;
+}
+
+.recent-card .recent-item span,
+.favorites-card .recent-item span,
+.recent-card .favorite-item span,
+.favorites-card .favorite-item span,
+.recent-card .muted,
+.favorites-card .muted {
+  color:#94a3b8 !important;
+}
+
+/* V20.0.3 — Thème sombre uniforme, sans panneaux blancs */
+:root{
+  --ink:#f8fafc;
+  --muted:#94a3b8;
+  --bg:#02060b;
+  --card:#0b1017;
+  --line:#263244;
+  --shadow:0 14px 34px rgba(0,0,0,.42);
+}
+html,body{background:#02060b!important;color:#f8fafc!important}
+main,.view{background:transparent!important}
+
+.search-card,.map-card,.intervention-card,.card-item,.stats-grid>div,
+.recent-card,.favorites-card,.assistant-address-card,.assistant-panel,
+.assistant-alert-head,.assistant-empty,.sms-import-card,.navigation-panel,
+.station-card,.vehicle-toolbar,.vehicle-card,.preplan-section,
+.choice-card,.filter-row,.nearest-panel{
+  background:#0b1017!important;
+  border-color:#263244!important;
+  color:#f8fafc!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.36)!important;
+}
+
+/* Historique et favoris */
+.recent-card,.favorites-card,
+section .recent-card,
+#view-map .recent-card{
+  background:#0b1017!important;
+  background-color:#0b1017!important;
+}
+.recent-list{background:transparent!important}
+.recent-item,.favorite-item>button:first-child,
+#recentInterventions .recent-item,
+#favoritePlaces .favorite-item>button:first-child{
+  background:#060b12!important;
+  background-color:#060b12!important;
+  color:#f8fafc!important;
+  border:1px solid #263244!important;
+}
+.recent-head,.recent-head *{background:transparent!important}
+
+/* Recherche, formulaires et sélecteurs */
+.search-row,.search-row input,.search-row button,
+.filter-row input,.filter-row select,
+.form-grid input,.form-grid select,.form-grid textarea,
+.assistant-address-row input,.sms-import-body textarea,
+input,select,textarea{
+  background:#070c13!important;
+  color:#f8fafc!important;
+  border-color:#334155!important;
+}
+input::placeholder,textarea::placeholder{color:#6f7c91!important}
+option{background:#0b1017!important;color:#f8fafc!important}
+
+/* Résultats, ressources proches et listes */
+.result-item,.nearest-item,.assistant-hydrant,
+.navigation-stats>div,.navigation-itinerary,
+.dispatch-preview{
+  background:#070c13!important;
+  color:#f8fafc!important;
+  border-color:#263244!important;
+}
+.secondary,.mini-map{
+  background:#172131!important;
+  color:#f8fafc!important;
+  border:1px solid #334155!important;
+}
+.danger,.icon-close{
+  background:#2a0f14!important;
+  color:#fecaca!important;
+  border:1px solid #7f1d1d!important;
+}
+
+/* Fenêtres modales et préplans */
+dialog,dialog form,.building-dialog,.preplan-dialog,.vehicle-dialog{
+  background:#080d14!important;
+  color:#f8fafc!important;
+}
+dialog::backdrop{background:rgba(0,0,0,.78)!important}
+.modal-head,.modal-actions,.form-section,.preplan-actions,.preplan-grid{
+  background:transparent!important;
+}
+
+/* Navigation inférieure et tiroir */
+.bottom-nav{
+  background:rgba(3,7,12,.97)!important;
+  border-top-color:#263244!important;
+}
+.bottom-nav button{color:#94a3b8!important}
+.bottom-nav button.active{color:#ef4444!important}
+.bottom-nav .add-main{color:#fff!important;background:#c81e1e!important}
+.drawer{background:#080d14!important}
+
+/* Cartes Leaflet */
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{
+  background:#080d14!important;
+  color:#f8fafc!important;
+}
+.leaflet-control-zoom a,
+.leaflet-control-layers{
+  background:#080d14!important;
+  color:#f8fafc!important;
+  border-color:#334155!important;
+}
+.leaflet-control-zoom a:hover{background:#111827!important}
+
+/* Texte */
+h1,h2,h3,h4,strong,label,.section-title h2{color:#f8fafc}
+.muted,.card-content p,.stats-grid span,.result-item small,
+.nearest-info span,.navigation-status,.assistant-empty p{
+  color:#94a3b8!important;
+}
+.text-btn{background:transparent!important;color:#ef4444!important}
+
+
+/* V20.1.0 — Mode prévention */
+.prevention-help{margin-bottom:14px}.prevention-help p{margin:.45rem 0 0;color:#94a3b8}.prevention-list{display:grid;gap:12px}.prevention-building-card{display:block}.prevention-building-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.prevention-building-head h3{margin:0 0 4px}.prevention-building-head p{margin:0;color:#94a3b8}.score-badge{min-width:58px;padding:8px 10px;border-radius:12px;text-align:center;font-weight:950;background:#2b1115;color:#fca5a5;border:1px solid #7f1d1d}.score-badge.partial{background:#2a210b;color:#fde68a;border-color:#854d0e}.score-badge.complete{background:#0b2819;color:#86efac;border-color:#166534}.score-track{height:9px;border-radius:999px;background:#182230;overflow:hidden;margin:12px 0}.score-track span{display:block;height:100%;background:#ef4444;border-radius:999px;transition:width .25s}.score-track span.partial{background:#f59e0b}.score-track span.complete{background:#22c55e}.prevention-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#94a3b8;font-size:.82rem}.prevention-meta .overdue{color:#fb923c;font-weight:800}.prevention-dialog{width:min(840px,96vw);max-height:92vh}.prevention-score-card{background:#070c13;border:1px solid #263244;border-radius:16px;padding:14px;margin-bottom:14px}.prevention-score-card>div:first-child{display:flex;justify-content:space-between;align-items:end}.prevention-score-card strong{font-size:1.6rem}.prevention-score-card p{margin:4px 0 0;color:#94a3b8}.prevention-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.prevention-check-grid label{display:flex;align-items:center;gap:9px;background:#070c13;border:1px solid #263244;border-radius:12px;padding:11px;color:#e2e8f0;font-weight:700}.prevention-check-grid input{width:20px;height:20px;accent-color:#dc2626}.risk-checks label:has(input:checked){border-color:#f97316;background:#24140b}.visit-history{display:grid;gap:8px}.visit-item{background:#070c13;border:1px solid #263244;border-radius:12px;padding:11px}.visit-item strong,.visit-item span{display:block}.visit-item span{color:#94a3b8;font-size:.82rem}.visit-item p{margin:6px 0 0}.prevention-summary{border-color:#166534!important}.prevention-summary .score-track{margin:8px 0 12px}@media(max-width:640px){.prevention-check-grid{grid-template-columns:1fr}.prevention-meta{flex-direction:column;gap:4px}.prevention-dialog{width:98vw}}
+
+
+/* V20.1.1 — Photos par catégorie en prévention */
+.prevention-photo-item{background:#070c13;border:1px solid #263244;border-radius:14px;padding:0;overflow:hidden}
+.prevention-photo-item>label{border:0!important;border-radius:0!important;background:transparent!important}
+.category-photo-controls{padding:0 11px 11px;display:flex;gap:8px;flex-wrap:wrap}
+.photo-action{flex:1;min-width:145px;padding:9px 10px;border-radius:10px;border:1px solid #334155;background:#111b29;color:#f8fafc;font-weight:800;font-size:.82rem}
+.photo-action.camera{border-color:#b91c1c;background:#2a0f14}.photo-action.import{border-color:#1d4ed8;background:#0c1b36}
+.category-photo-input{display:none!important}
+.category-photo-gallery{width:100%;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.category-photo-gallery>small{color:#94a3b8}
+.category-photo-thumb{position:relative;margin:0;width:74px;height:74px;border:1px solid #334155;border-radius:10px;overflow:hidden;background:#02050a}
+.category-photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.category-photo-thumb button{position:absolute;right:3px;top:3px;width:25px;height:25px;border-radius:50%;border:1px solid #fecaca;background:#b91c1c;color:#fff;font-size:18px;line-height:20px;padding:0}
+.prevention-photo-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:12px}
+.prevention-photo-summary img{width:100%;height:82px;object-fit:cover;border-radius:10px;border:1px solid #334155}
+.prevention-check-grid .prevention-photo-item:has(input:checked){border-color:#dc2626}.risk-checks .prevention-photo-item:has(input:checked){border-color:#f97316;background:#24140b}
+@media(max-width:640px){.photo-action{min-width:calc(50% - 4px);font-size:.76rem;padding:9px 5px}}
+
+/* V20.1.2 — Prévention = préplan opérationnel */
+.preplan-prevention-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.preplan-from-prevention{border-color:#d62828!important;box-shadow:0 0 0 1px rgba(214,40,40,.2) inset}
+.preplan-check-list{margin:10px 0 0;padding-left:1.3rem;display:grid;gap:8px}
+.preplan-check-list li{color:#f3f6fb}
+.preplan-unconfirmed{color:#8f9bad!important}
+.preplan-alert{border-color:#ff9500!important;background:rgba(255,149,0,.08)!important}
+.preplan-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.preplan-photo-card{display:block;position:relative;border:1px solid #26344d;border-radius:14px;overflow:hidden;background:#05080f;color:#fff;text-decoration:none}
+.preplan-photo-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.preplan-photo-card span{display:block;padding:8px 10px;font-size:.82rem;font-weight:700}
+@media(min-width:700px){.preplan-photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}

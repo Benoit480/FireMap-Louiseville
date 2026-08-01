@@ -88,7 +88,7 @@
       routeCoordinates=route.geometry.coordinates.map(c=>[c[1],c[0]]);
       routeSteps=(route.legs||[]).flatMap(l=>l.steps||[]);
       if(routeLine)routeLayer.removeLayer(routeLine);
-      routeLine=L.polyline(routeCoordinates,{color:"#ff3b30",weight:6,opacity:.92,lineJoin:"round"}).addTo(routeLayer);
+      routeLine=L.polyline(routeCoordinates,{color:"#1689ff",weight:6,opacity:.95,lineJoin:"round"}).addTo(routeLayer);
       L.circleMarker([destination.lat,destination.lng],{radius:10,color:"#fff",weight:3,fillColor:"#ff3b30",fillOpacity:1}).bindTooltip("Intervention").addTo(routeLayer);
       I.map.fitBounds(routeLine.getBounds(),{padding:[45,45]});
       $("navigationDistance").textContent=fmtDistance(route.distance);
@@ -111,9 +111,14 @@
       else if(Date.now()-lastRouteAt>25000&&distance(pos,lastRouteOrigin)>120)calculate(pos);
     },err=>{setStatus(err.code===1?"Autorisez la localisation dans les réglages de Safari.":"Signal GPS indisponible. Réessayez à l’extérieur.",true)}, {enableHighAccuracy:true,maximumAge:3000,timeout:15000});
   }
-  function start(dest){
+  function start(dest,options={}){
     if(!dest||!isFinite(dest.lat)||!isFinite(dest.lng)){I.toast("Destination invalide.");return}
-    stop(false);destination={...dest,lat:Number(dest.lat),lng:Number(dest.lng)};showPanel();routeLayer.addTo(I.map);beginWatch();
+    stop(false);
+    destination={...dest,lat:Number(dest.lat),lng:Number(dest.lng)};
+    routeLayer.addTo(I.map);
+    I.map.setView([destination.lat,destination.lng],17);
+    if(options.showPanel!==false)showPanel();
+    beginWatch();
   }
   function stop(hide=true){
     if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}
@@ -121,6 +126,20 @@
     routeLayer.clearLayers();positionMarker=null;accuracyCircle=null;routeLine=null;routeCoordinates=[];routeSteps=[];currentPosition=null;lastRouteOrigin=null;lastRouteAt=0;
     if(hide)$("integratedNavigation")?.classList.add("hidden");
   }
+
+  // Démarre automatiquement le GPS lorsqu’un appel devient actif, puis l’arrête à la fin.
+  window.addEventListener("firemap:intervention-start",event=>{
+    const dest=event.detail;
+    if(!dest)return;
+    start(dest,{showPanel:false});
+    I.map.setView([Number(dest.lat),Number(dest.lng)],17);
+    I.toast("GPS activé automatiquement vers l’intervention.");
+  });
+  window.addEventListener("firemap:intervention-end",()=>{
+    stop(true);
+    I.toast("GPS arrêté : intervention terminée.");
+  });
+
   $("navigationRecalculate").onclick=()=>currentPosition?calculate(currentPosition):beginWatch();
   $("navigationExternal").onclick=()=>destination&&(location.href=I.navUrl(destination.lat,destination.lng));
   $("navigationStop").onclick=()=>stop(true);
